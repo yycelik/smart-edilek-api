@@ -1,0 +1,65 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+	<mirrors>
+		<mirror>
+			<id>nexus-server</id>
+			<mirrorOf>*</mirrorOf>
+			<url>${env.MVN_REGISTRY_GROUP}</url>
+		</mirror>
+	</mirrors>
+	
+	<profiles>
+		<profile>
+		  <id>nexus-server</id>
+		  <!--Enable snapshots for the built-in central repo to direct -->
+		  <!--all requests to nexus via the mirror -->
+		  <repositories>
+			<repository>
+			  <id>central</id>
+			  <url>${env.MVN_REGISTRY_GROUP}</url>
+			  <releases><enabled>true</enabled></releases>
+			  <snapshots><enabled>true</enabled></snapshots>
+			</repository>
+		  </repositories>
+		  <pluginRepositories>
+			<pluginRepository>
+			  <id>central</id>
+			  <url>${env.MVN_REGISTRY_GROUP}</url>
+			  <releases><enabled>true</enabled></releases>
+			  <snapshots><enabled>true</enabled></snapshots>
+			</pluginRepository>
+		  </pluginRepositories>
+		</profile>
+		<profile>
+			<id>release-deployment</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<release.repository.url>${env.MVN_REGISTRY_RELEASE}</release.repository.url>
+			</properties>
+		</profile>
+		<profile>
+			<id>snapshot-deployment</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<properties>
+				<snapshot.repository.url>${env.MVN_REGISTRY_SNAPSHOOT}</snapshot.repository.url>
+			</properties>
+		</profile>
+	</profiles>
+	
+	<servers>
+		<server>
+			<id>nexus-server</id>
+			<username>${env.REGISTRY_USERNAME}</username>
+			<password>${env.REGISTRY_PASSWORD}</password>
+		</server>
+	</servers>
+	
+	<activeProfiles>
+		<!--make the profile active all the time -->
+		<activeProfile>nexus-server</activeProfile>
+  </activeProfiles>
+</settings>

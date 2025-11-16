@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-passthrough: 'true'
+    nginx.org/ssl-services: smart-edilek-api
+  name: edilek-api-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: dev-edilek-api.s3t.co
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: smart-edilek-api
+            port:
+              number: 8443
+  tls:
+  - hosts:
+    - dev-edilek-api.s3t.co
+    secretName: s3t-wildcard-cert-prod

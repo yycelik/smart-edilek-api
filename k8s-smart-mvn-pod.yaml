@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: smart-mvn-agent
+spec:
+  hostAliases:
+  - ip: "192.168.0.200"
+    hostnames:
+    - "jenkins.s3t.co"
+    - "tunnel.jenkins.s3t.co"
+    - "nexus.s3t.co"
+    - "docker-s.nexus.s3t.co"
+    - "docker-r.nexus.s3t.co"
+    - "docker-p.nexus.s3t.co"
+    - "docker-g.nexus.s3t.co"
+  - ip: "192.168.0.240"
+    hostnames:
+    - "s3t.co"
+    - "kmaster.com"
+  containers:
+  - name: smart-mvn-agent
+    image: docker-r.nexus.s3t.co/smart-mvn-agent:latest
+    command:
+    - cat
+    tty: true
+  - name: smart-skaffold-agent
+    image: docker-r.nexus.s3t.co/smart-skaffold-agent:latest
+    command:
+    - cat
+    tty: true
+  imagePullSecrets:
+    - name: nexus-s3t-co-docker-config

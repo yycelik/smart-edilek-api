@@ -1,0 +1,30 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: smart-edilek-api
+build:
+  tagPolicy:
+    sha256: {}
+  artifacts:
+    - image: docker-s.nexus.s3t.co/smart/edilek
+      jib:
+        args:
+          - --settings=C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.1\conf\settings.xml
+          - -DskipTests=true
+  #insecureRegistries: ["docker-s.nexus.s3t.co","docker-r.nexus.s3t.co","docker-p.nexus.s3t.co","docker-g.nexus.s3t.co"]
+profiles:
+- name: prod
+  build:
+    artifacts:
+    - image: docker-r.nexus.s3t.co/smart/edilek
+  manifests:
+    rawYaml:
+      - k8s/prod/deployment.yaml
+      - k8s/prod/service.yaml
+      - k8s/prod/ingress.yaml 
+manifests:
+  rawYaml:
+    - k8s/dev/deployment.yaml
+    - k8s/dev/service.yaml
+    - k8s/dev/ingress.yaml  
+    - k8s/dev/transport.yaml  

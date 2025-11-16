@@ -1,0 +1,17 @@
+apiVersion: k8s.nginx.org/v1
+kind: TransportServer
+metadata:
+  name: debug-smart-edilek-api
+  namespace: e-dilek-dev
+spec:
+  listener:
+    # Global Configuraiton >> nginx-configuration >> debug-{n}-listener
+    # nginx Namespace >> nginx Deployment >> debug-{n}-port >> port should be modified
+    name: debug-01-listener
+    protocol: TCP 
+  upstreams:
+    - name: debug-01-upstream
+      service: smart-edilek-api
+      port: 5005
+  action:
+    pass: debug-01-upstream

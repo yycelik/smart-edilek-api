@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smart-edilek-api
+  labels:
+    app: smart-edilek-api
+spec:
+  replicas: 1
+  #strategy:
+  #  type: RollingUpdate
+  selector:
+    matchLabels:
+      app: smart-edilek-api
+  template:
+    metadata:
+      labels:
+        app: smart-edilek-api
+    spec:
+      containers:
+      - name: smart-edilek-api
+        image: docker-s.nexus.s3t.co/smart/edilek:latest
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: 8080
+            protocol: TCP
+          - name: debug
+            containerPort: 5005
+            protocol: TCP
+          - name: httpsport
+            containerPort: 8443
+            protocol: TCP
+        resources:
+          requests:
+            memory: "512Mi"  # Minimum RAM ihtiyacı
+            cpu: "250m"      # Minimum CPU ihtiyacı
+          limits:
+            memory: "1024Mi" # Maksimum RAM
+            cpu: "500m"      # Maksimum CPU
+        env:
+          - name: DATASOURCE_URL
+            valueFrom: 
+              secretKeyRef:
+                name: smart-database
+                key: url
+          - name: DATASOURCE_USERNAME
+            valueFrom: 
+              secretKeyRef:
+                name: smart-database
+                key: username
+          - name: DATASOURCE_PASSWORD
+            valueFrom: 
+              secretKeyRef:
+                name: smart-database
+                key: password 
+          - name: CERTIFICATE_PASSWORD
+            valueFrom: 
+              secretKeyRef:
+                name: smart-certificate
+                key: password 
+        volumeMounts:
+          - name: my-certificate-volume
+            mountPath: "/etc/certs"
+      volumes:
+        - name: my-certificate-volume
+          secret:
+            secretName: s3t-wildcard-cert-prod-p12
+      imagePullSecrets:
+        - name: nexus-s3t-co-docker-config
+        
