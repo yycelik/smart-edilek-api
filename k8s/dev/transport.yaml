@@ -7,11 +7,11 @@ spec:
   listener:
     # Global Configuraiton >> nginx-configuration >> debug-{n}-listener
     # nginx Namespace >> nginx Deployment >> debug-{n}-port >> port should be modified
-    name: debug-01-listener
+    name: debug-03-listener
     protocol: TCP 
   upstreams:
-    - name: debug-01-upstream
+    - name: debug-03-upstream
       service: smart-edilek-api
-      port: 5005
+      port: 5007
   action:
-    pass: debug-01-upstream
+    pass: debug-03-upstream

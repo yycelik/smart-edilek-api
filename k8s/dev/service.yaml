@@ -10,8 +10,8 @@ spec:
       port: 8080
       targetPort: 8080
     - name: debugport
-      port: 5005
-      targetPort: 5005
+      port: 5007
+      targetPort: 5007
     - name: httpsport
       port: 8443
       targetPort: 8443

@@ -15,6 +15,11 @@ $env:DATASOURCE_USERNAME = "root"
 $env:DATASOURCE_PASSWORD = "app321."
 $env:CERTIFICATE_PASSWORD = "159753"
 
+# Keycloak configuration
+$env:KEYCLOAK_AUTH_SERVER_URL = "https://keycloak.s3t.co"
+$env:KEYCLOAK_REALM = "dilekce"
+$env:KEYCLOAK_CLIENT_ID = "dev-api.edilek.com"
+
 $Env:KUBECONFIG="$Env:KUBECONFIG;$HOME\.kube\config"
 
 # Run Maven command

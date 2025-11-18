@@ -92,6 +92,29 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+		<!-- Keycloak and Spring Security OAuth2 Resource Server -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-spring-boot-starter</artifactId>
+			<version>23.0.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<version>23.0.3</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -128,12 +151,12 @@
                         <jvmFlags>
                             <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
                             <jvmFlag>-Duser.timezone=GMT+03</jvmFlag>
-							<jvmFlag>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005</jvmFlag>
+							<jvmFlag>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5007</jvmFlag>
                         </jvmFlags>
-                        <mainClass>com.smart.edilek.edilekApplication</mainClass>
+                        <mainClass>com.smart.edilek.EdilekApplication</mainClass>
                         <ports>
                             <port>8443</port>
-							<port>5005</port>
+							<port>5007</port>
                         </ports>
                     </container>
                 </configuration>
@@ -187,6 +210,7 @@
 									<jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
 									<jvmFlag>-Duser.timezone=GMT+03</jvmFlag>
 								</jvmFlags>
+								<mainClass>com.smart.edilek.EdilekApplication</mainClass>
 								<ports>
 									<port>8443</port>
 								</ports>

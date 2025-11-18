@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smart-keycloak-config
+data:
+  auth-server-url: "https://keycloak.s3t.co"
+  realm: "dilekce"
+  client-id: "dev-api.edilek.com"

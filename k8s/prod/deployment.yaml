@@ -54,13 +54,28 @@ spec:
             valueFrom: 
               secretKeyRef:
                 name: smart-certificate
-                key: password 
+                key: password
+          - name: KEYCLOAK_AUTH_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: smart-keycloak-config
+                key: auth-server-url
+          - name: KEYCLOAK_REALM
+            valueFrom:
+              configMapKeyRef:
+                name: smart-keycloak-config
+                key: realm
+          - name: KEYCLOAK_CLIENT_ID
+            valueFrom:
+              configMapKeyRef:
+                name: smart-keycloak-config
+                key: client-id 
         volumeMounts:
           - name: my-certificate-volume
             mountPath: "/etc/certs"
       volumes:
         - name: my-certificate-volume
           secret:
-            secretName: s3t-wildcard-cert-prod-p12
+            secretName: edilek-wildcard-cert-prod-p12
       imagePullSecrets:
         - name: nexus-s3t-co-docker-config

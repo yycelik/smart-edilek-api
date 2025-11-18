@@ -21,10 +21,12 @@ profiles:
     rawYaml:
       - k8s/prod/deployment.yaml
       - k8s/prod/service.yaml
-      - k8s/prod/ingress.yaml 
+      - k8s/prod/ingress.yaml
+      - k8s/prod/keycloak-configmap.yaml 
 manifests:
   rawYaml:
     - k8s/dev/deployment.yaml
     - k8s/dev/service.yaml
     - k8s/dev/ingress.yaml  
-    - k8s/dev/transport.yaml  
+    - k8s/dev/transport.yaml
+    - k8s/dev/keycloak-configmap.yaml  

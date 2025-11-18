@@ -61,7 +61,7 @@ to enable remote debug .vscode/launch.json
             "name": "debug",
             "request": "attach",
             "hostName": "debug.s3t.co",
-            "port": 5005,
+            "port": 5007,
             "projectName": "edilek"
         }
     ]
