@@ -1,32 +1,42 @@
 package com.smart.edilek.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import lombok.Getter;
 import lombok.Setter;
 
-public class BasicApplicationDto {
+public class UserOrderDto {
 
 	@Getter @Setter
-	private long id;
+	private String id;
 
 	@Getter @Setter
-	private TypeDto type;
+	private UserDto user;
 
 	@Getter @Setter
-	private String typeOther;
+	private LicensePackageDto licensePackage;
 
 	@Getter @Setter
-	private FirmDto firm;
+	private String status;
 
 	@Getter @Setter
-	private String firmOther;
+	private BigDecimal price;
 
 	@Getter @Setter
-	private String title;
+	private String currency;
 
 	@Getter @Setter
-	private String description;
+	private String paymentProvider;
+
+	@Getter @Setter
+	private String paymentRef;
+
+	@Getter @Setter
+	private LocalDateTime purchasedAt;
+
+	@Getter @Setter
+	private LocalDateTime expiresAt;
 
 	@Getter @Setter
 	private String createdBy;
