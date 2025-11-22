@@ -3,6 +3,8 @@ package com.smart.edilek.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.entity.lookup.CreditTransactionType;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -39,8 +41,9 @@ public class CreditTransaction implements Serializable {
 	@JoinColumn(name="petition_id")
 	private Petition petition;
 
-	@Column(name="type", nullable = false, length = 50)
-	private String type;
+	@ManyToOne
+	@JoinColumn(name="credit_transaction_type_id", nullable = false)
+	private CreditTransactionType creditTransactionType;
 
 	@Column(name="amount", nullable = false)
 	private Integer amount;

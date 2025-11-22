@@ -3,6 +3,9 @@ package com.smart.edilek.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.CurrencyDto;
+import com.smart.edilek.models.lookup.PetitionRequestTypeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +18,7 @@ public class PetitionRequestDto {
 	private String petitionId;
 
 	@Getter @Setter
-	private String type;
+	private PetitionRequestTypeDto petitionRequestType;
 
 	@Getter @Setter
 	private String description;
@@ -25,6 +28,9 @@ public class PetitionRequestDto {
 
 	@Getter @Setter
 	private LocalDateTime deadline;
+
+	@Getter @Setter
+	private CurrencyDto currency;
 
 	@Getter @Setter
 	private LocalDateTime createdDate;

@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.entity.lookup.ApplicantType;
+import com.smart.edilek.entity.lookup.SignatureType;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,8 +31,9 @@ public class PetitionIdentity implements Serializable {
 	@JoinColumn(name="petition_id", nullable = false)
 	private Petition petition;
 
-	@Column(name="applicant_type", nullable = false, length = 20)
-	private String applicantType;
+	@ManyToOne
+	@JoinColumn(name="applicant_type_id")
+	private ApplicantType applicantType;
 
 	// Individual fields
 	@Column(name="first_name", length = 255)
@@ -73,8 +77,9 @@ public class PetitionIdentity implements Serializable {
 	@Column(name="address", columnDefinition = "TEXT")
 	private String address;
 
-	@Column(name="signature_type", length = 20)
-	private String signatureType;
+	@ManyToOne
+	@JoinColumn(name="signature_type_id")
+	private SignatureType signatureType;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;

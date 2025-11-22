@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.smart.edilek.entity.lookup.Currency;
+import com.smart.edilek.entity.lookup.PaymentProvider;
+import com.smart.edilek.entity.lookup.UserOrderStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,17 +37,20 @@ public class UserOrder implements Serializable {
 	@JoinColumn(name="license_package_id", nullable = false)
 	private LicensePackage licensePackage;
 
-	@Column(name="status", nullable = false, length = 50, columnDefinition = "VARCHAR(50) DEFAULT 'PENDING'")
-	private String status = "PENDING";
+	@ManyToOne
+	@JoinColumn(name="user_order_status_id", nullable = false)
+	private UserOrderStatus userOrderStatus;
+
+	@ManyToOne
+	@JoinColumn(name="payment_provider_id", nullable = false)
+	private PaymentProvider paymentProvider;
 
 	@Column(name="price", nullable = false, precision = 10, scale = 2)
 	private BigDecimal price;
 
-	@Column(name="currency", nullable = false, length = 10, columnDefinition = "VARCHAR(10) DEFAULT 'TRY'")
-	private String currency = "TRY";
-
-	@Column(name="payment_provider", length = 50)
-	private String paymentProvider;
+	@ManyToOne
+	@JoinColumn(name="currency_id", nullable = false)
+	private Currency currency;
 
 	@Column(name="payment_ref", length = 255)
 	private String paymentRef;

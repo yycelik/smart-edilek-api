@@ -2,6 +2,11 @@ package com.smart.edilek.models;
 
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.PetitionPreferencesDateFormatDto;
+import com.smart.edilek.models.lookup.PetitionPreferencesLanguageDto;
+import com.smart.edilek.models.lookup.PetitionPreferencesLengthDto;
+import com.smart.edilek.models.lookup.PetitionPreferencesStyleDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,13 +19,13 @@ public class PetitionPreferencesDto {
 	private String petitionId;
 
 	@Getter @Setter
-	private String style;
+	private PetitionPreferencesStyleDto style;
 
 	@Getter @Setter
-	private String language;
+	private PetitionPreferencesLanguageDto language;
 
 	@Getter @Setter
-	private String length;
+	private PetitionPreferencesLengthDto length;
 
 	@Getter @Setter
 	private Boolean paragraphs;
@@ -32,7 +37,7 @@ public class PetitionPreferencesDto {
 	private Boolean legalReferences;
 
 	@Getter @Setter
-	private String dateFormat;
+	private PetitionPreferencesDateFormatDto dateFormat;
 
 	@Getter @Setter
 	private LocalDateTime createdDate;

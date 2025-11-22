@@ -56,6 +56,11 @@ public class GenericDaoImp<T> implements GenericDao<T> {
 		return entityManager.find(tClass, id);
 	}
 
+	@Override
+	public T findEntity(Class<T> tClass, String id) {	
+		return entityManager.find(tClass, id);
+	}
+
 	/*
 	 * Datatable & Primereact
 	 * 

@@ -47,6 +47,12 @@ public class GenericServiceImp<T> implements GenericService<T> {
 
     @Transactional(readOnly = true)
     @LogExecutionTime
+    public T get(Class<T> tClass, String id) {
+        return genericDao.findEntity(tClass, id);
+    }
+
+    @Transactional(readOnly = true)
+    @LogExecutionTime
     public List<T> find(Class<T> tClass, LazyEvent lazyEvent) {
         return genericDao.find(tClass, lazyEvent);
     }

@@ -12,6 +12,7 @@ public interface GenericDao<T> {
 	void removeEntity(T entity);
 	T modifyEntity(T entity);
 	T findEntity(Class<T> tClass, long id);
+	T findEntity(Class<T> tClass, String id);
 
 	List<T> find(Class<T> tClass, LazyEvent lazyEvent);
 	long count(Class<T> tClass, LazyEvent lazyEvent);

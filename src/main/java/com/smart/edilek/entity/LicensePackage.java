@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.smart.edilek.entity.lookup.Currency;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,8 +39,9 @@ public class LicensePackage implements Serializable {
 	@Column(name="price", nullable = false, precision = 10, scale = 2)
 	private BigDecimal price;
 
-	@Column(name="currency", nullable = false, length = 10, columnDefinition = "VARCHAR(10) DEFAULT 'TRY'")
-	private String currency = "TRY";
+	@ManyToOne
+	@JoinColumn(name="currency_id", nullable = false)
+	private Currency currency;
 
 	@Column(name="credit_amount", nullable = false)
 	private Integer creditAmount;

@@ -2,6 +2,8 @@ package com.smart.edilek.models;
 
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.CreditTransactionTypeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +25,7 @@ public class CreditTransactionDto {
 	private String petitionId;
 
 	@Getter @Setter
-	private String type;
+	private CreditTransactionTypeDto creditTransactionType;
 
 	@Getter @Setter
 	private Integer amount;

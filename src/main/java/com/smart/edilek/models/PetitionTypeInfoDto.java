@@ -2,6 +2,9 @@ package com.smart.edilek.models;
 
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.InstitutionCategoryDto;
+import com.smart.edilek.models.lookup.PetitionTypeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,13 +17,13 @@ public class PetitionTypeInfoDto {
 	private String petitionId;
 
 	@Getter @Setter
-	private String type;
+	private PetitionTypeDto petitionType;
 
 	@Getter @Setter
 	private String customTypeName;
 
 	@Getter @Setter
-	private String institutionCategory;
+	private InstitutionCategoryDto institutionCategory;
 
 	@Getter @Setter
 	private String institutionName;

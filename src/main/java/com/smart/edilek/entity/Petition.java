@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.smart.edilek.entity.lookup.PetitionMode;
+import com.smart.edilek.entity.lookup.PetitionStatus;
+import com.smart.edilek.entity.lookup.PetitionType;
+import com.smart.edilek.entity.lookup.InstitutionCategory;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,23 +33,38 @@ public class Petition implements Serializable {
 	@JoinColumn(name="user_id", nullable = false)
 	private User user;
 
-	@Column(name="petition_mode", nullable = false, length = 20)
-	private String petitionMode;
+	@ManyToOne
+	@JoinColumn(name="petition_mode_id", nullable = false)
+	private PetitionMode petitionMode;
 
-	@Column(name="status", nullable = false, length = 50, columnDefinition = "VARCHAR(50) DEFAULT 'DRAFT'")
-	private String status = "DRAFT";
+	@ManyToOne
+	@JoinColumn(name="petition_status_id", nullable = false)
+	private PetitionStatus petitionStatus;
 
 	@Column(name="credit_cost", nullable = false, columnDefinition = "INT DEFAULT 1")
 	private Integer creditCost = 1;
 
-	@Column(name="summary_title", length = 255)
-	private String summaryTitle;
+	// Konu & Olay
+	@Column(name="title", nullable = false, length = 255)
+	private String title;
 
-	@Column(name="summary_petition_type", length = 100)
-	private String summaryPetitionType;
+	@Column(name="summary", nullable = false, columnDefinition = "TEXT")
+	private String summary;
 
-	@Column(name="summary_institution_name", length = 255)
-	private String summaryInstitutionName;
+	// Tür & Kurum
+	@ManyToOne
+	@JoinColumn(name="petition_type_id", nullable = false)
+	private PetitionType petitionType;
+
+	@Column(name="type_name", length = 255)
+	private String typeName;
+
+	@ManyToOne
+	@JoinColumn(name="institution_category_id")
+	private InstitutionCategory institutionCategory;
+
+	@Column(name="institution_name", length = 255)
+	private String institutionName;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;

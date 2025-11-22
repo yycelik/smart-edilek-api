@@ -3,7 +3,7 @@ package com.smart.edilek.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.smart.edilek.entity.lookup.SignatureType;
+import com.smart.edilek.entity.lookup.EvidenceType;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,34 +16,22 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="petition_agreements")
-@NamedQuery(name="PetitionAgreements.findAll", query="SELECT p FROM PetitionAgreements p")
-public class PetitionAgreements implements Serializable {
+@Table(name="petition_attachment_evidence_type")
+@NamedQuery(name="PetitionAttachmentEvidenceType.findAll", query="SELECT p FROM PetitionAttachmentEvidenceType p")
+public class PetitionAttachmentEvidenceType implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
 	@Column(name="id", length = 255)
 	private String id;
 
-	@OneToOne
-	@JoinColumn(name="petition_id", nullable = false)
-	private Petition petition;
-
-	@Column(name="kvkk", columnDefinition = "TINYINT(1) DEFAULT 0")
-	private Boolean kvkk = false;
-
-	@Column(name="terms_of_service", columnDefinition = "TINYINT(1) DEFAULT 0")
-	private Boolean termsOfService = false;
-
-	@Column(name="data_sharing", columnDefinition = "TINYINT(1) DEFAULT 0")
-	private Boolean dataSharing = false;
-
-	@Column(name="institution_data_sharing", columnDefinition = "TINYINT(1) DEFAULT 0")
-	private Boolean institutionDataSharing = false;
+	@ManyToOne
+	@JoinColumn(name="petition_attachment_id", nullable = false)
+	private PetitionAttachment petitionAttachment;
 
 	@ManyToOne
-	@JoinColumn(name="signature_type_id")
-	private SignatureType signatureType;
+	@JoinColumn(name="evidence_type_id", nullable = false)
+	private EvidenceType evidenceType;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;

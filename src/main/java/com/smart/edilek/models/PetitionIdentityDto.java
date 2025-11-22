@@ -3,6 +3,9 @@ package com.smart.edilek.models;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.ApplicantTypeDto;
+import com.smart.edilek.models.lookup.SignatureTypeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,7 +18,7 @@ public class PetitionIdentityDto {
 	private String petitionId;
 
 	@Getter @Setter
-	private String applicantType;
+	private ApplicantTypeDto applicantType;
 
 	// Individual fields
 	@Getter @Setter
@@ -60,7 +63,7 @@ public class PetitionIdentityDto {
 	private String address;
 
 	@Getter @Setter
-	private String signatureType;
+	private SignatureTypeDto signatureType;
 
 	@Getter @Setter
 	private LocalDateTime createdDate;

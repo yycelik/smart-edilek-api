@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.entity.lookup.Currency;
+import com.smart.edilek.entity.lookup.PetitionRequestType;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,8 +31,9 @@ public class PetitionRequest implements Serializable {
 	@JoinColumn(name="petition_id", nullable = false)
 	private Petition petition;
 
-	@Column(name="type", nullable = false, length = 100)
-	private String type;
+	@ManyToOne
+	@JoinColumn(name="petition_request_type_id", nullable = false)
+	private PetitionRequestType petitionRequestType;
 
 	@Column(name="description", nullable = false, columnDefinition = "TEXT")
 	private String description;
@@ -39,6 +43,10 @@ public class PetitionRequest implements Serializable {
 
 	@Column(name="deadline")
 	private LocalDateTime deadline;
+
+	@ManyToOne
+	@JoinColumn(name="currency_id", nullable = false)
+	private Currency currency;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;

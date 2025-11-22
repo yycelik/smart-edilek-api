@@ -3,6 +3,8 @@ package com.smart.edilek.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.CurrencyDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +26,7 @@ public class LicensePackageDto {
 	private BigDecimal price;
 
 	@Getter @Setter
-	private String currency;
+	private CurrencyDto currency;
 
 	@Getter @Setter
 	private Integer creditAmount;

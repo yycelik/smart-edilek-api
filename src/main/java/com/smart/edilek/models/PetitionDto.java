@@ -3,6 +3,11 @@ package com.smart.edilek.models;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.smart.edilek.models.lookup.InstitutionCategoryDto;
+import com.smart.edilek.models.lookup.PetitionModeDto;
+import com.smart.edilek.models.lookup.PetitionStatusDto;
+import com.smart.edilek.models.lookup.PetitionTypeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,22 +20,31 @@ public class PetitionDto {
 	private UserDto user;
 
 	@Getter @Setter
-	private String petitionMode;
+	private PetitionModeDto petitionMode;
 
 	@Getter @Setter
-	private String status;
+	private PetitionStatusDto petitionStatus;
 
 	@Getter @Setter
 	private Integer creditCost;
 
 	@Getter @Setter
-	private String summaryTitle;
+	private String title;
 
 	@Getter @Setter
-	private String summaryPetitionType;
+	private String summary;
 
 	@Getter @Setter
-	private String summaryInstitutionName;
+	private PetitionTypeDto petitionType;
+
+	@Getter @Setter
+	private String typeName;
+
+	@Getter @Setter
+	private InstitutionCategoryDto institutionCategory;
+
+	@Getter @Setter
+	private String institutionName;
 
 	@Getter @Setter
 	private PetitionAgreementsDto petitionAgreements;

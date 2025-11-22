@@ -3,6 +3,10 @@ package com.smart.edilek.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.models.lookup.CurrencyDto;
+import com.smart.edilek.models.lookup.PaymentProviderDto;
+import com.smart.edilek.models.lookup.UserOrderStatusDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,16 +22,16 @@ public class UserOrderDto {
 	private LicensePackageDto licensePackage;
 
 	@Getter @Setter
-	private String status;
+	private UserOrderStatusDto userOrderStatus;
+
+	@Getter @Setter
+	private PaymentProviderDto paymentProvider;
 
 	@Getter @Setter
 	private BigDecimal price;
 
 	@Getter @Setter
-	private String currency;
-
-	@Getter @Setter
-	private String paymentProvider;
+	private CurrencyDto currency;
 
 	@Getter @Setter
 	private String paymentRef;

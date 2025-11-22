@@ -3,6 +3,11 @@ package com.smart.edilek.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.entity.lookup.PetitionPreferencesStyle;
+import com.smart.edilek.entity.lookup.PetitionPreferencesLanguage;
+import com.smart.edilek.entity.lookup.PetitionPreferencesLength;
+import com.smart.edilek.entity.lookup.PetitionPreferencesDateFormat;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,14 +32,17 @@ public class PetitionPreferences implements Serializable {
 	@JoinColumn(name="petition_id", nullable = false)
 	private Petition petition;
 
-	@Column(name="style", length = 50)
-	private String style;
+	@ManyToOne
+	@JoinColumn(name="style_id")
+	private PetitionPreferencesStyle style;
 
-	@Column(name="language", length = 10)
-	private String language;
+	@ManyToOne
+	@JoinColumn(name="language_id")
+	private PetitionPreferencesLanguage language;
 
-	@Column(name="length", length = 20)
-	private String length;
+	@ManyToOne
+	@JoinColumn(name="length_id")
+	private PetitionPreferencesLength length;
 
 	@Column(name="paragraphs", columnDefinition = "TINYINT(1) DEFAULT 1")
 	private Boolean paragraphs = true;
@@ -45,8 +53,9 @@ public class PetitionPreferences implements Serializable {
 	@Column(name="legal_references", columnDefinition = "TINYINT(1) DEFAULT 0")
 	private Boolean legalReferences = false;
 
-	@Column(name="date_format", length = 50)
-	private String dateFormat;
+	@ManyToOne
+	@JoinColumn(name="date_format_id")
+	private PetitionPreferencesDateFormat dateFormat;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;

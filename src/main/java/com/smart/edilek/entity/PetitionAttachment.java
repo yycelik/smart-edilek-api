@@ -3,6 +3,8 @@ package com.smart.edilek.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.smart.edilek.entity.lookup.PrivacyLevel;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -48,8 +50,9 @@ public class PetitionAttachment implements Serializable {
 	@Column(name="upload_date")
 	private LocalDateTime uploadDate;
 
-	@Column(name="privacy_level", nullable = false, length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'general'")
-	private String privacyLevel = "general";
+	@ManyToOne
+	@JoinColumn(name="privacy_level_id")
+	private PrivacyLevel privacyLevel;
 
 	@Column(name="evidence_types", length = 500)
 	private String evidenceTypes;

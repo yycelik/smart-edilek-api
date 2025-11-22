@@ -10,6 +10,7 @@ public interface GenericService<T> {
 	void remove(T t);
 	T modify(T t);
 	T get(Class<T> tClass, long id);
+	T get(Class<T> tClass, String id);
 
 	List<T> find(Class<T> tClass, LazyEvent lazyEvent);
 	long count(Class<T> tClass, LazyEvent lazyEvent);
