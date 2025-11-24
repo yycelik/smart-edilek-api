@@ -6,8 +6,17 @@ import lombok.Setter;
 public class UserOrderStatusDto {
 	
 	@Getter @Setter
+	private long id;
+	
+	@Getter @Setter
 	private String code;
 	
 	@Getter @Setter
+	private String name;
+	
+	@Getter @Setter
 	private String description;
+	
+	@Getter @Setter
+	private boolean active;
 }

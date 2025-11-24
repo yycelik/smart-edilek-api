@@ -64,17 +64,17 @@ public class CreditTransactionController {
     public ResponseEntity<MainDto> addCreditTransaction(@RequestBody CreditTransaction creditTransaction, Authentication authentication) {
         try {
             // Set relationships
-            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() != null) {
-                creditTransaction.setUser(userGenericService.get(User.class, Long.parseLong(creditTransaction.getUser().getId())));
+            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() > 0) {
+                creditTransaction.setUser(userGenericService.get(User.class, creditTransaction.getUser().getId()));
             }
-            if (creditTransaction.getWallet() != null && creditTransaction.getWallet().getId() != null) {
-                creditTransaction.setWallet(creditWalletGenericService.get(CreditWallet.class, Long.parseLong(creditTransaction.getWallet().getId())));
+            if (creditTransaction.getWallet() != null && creditTransaction.getWallet().getId() > 0) {
+                creditTransaction.setWallet(creditWalletGenericService.get(CreditWallet.class, creditTransaction.getWallet().getId()));
             }
-            if (creditTransaction.getUserOrder() != null && creditTransaction.getUserOrder().getId() != null) {
-                creditTransaction.setUserOrder(userOrderGenericService.get(UserOrder.class, Long.parseLong(creditTransaction.getUserOrder().getId())));
+            if (creditTransaction.getUserOrder() != null && creditTransaction.getUserOrder().getId() > 0) {
+                creditTransaction.setUserOrder(userOrderGenericService.get(UserOrder.class, creditTransaction.getUserOrder().getId()));
             }
-            if (creditTransaction.getPetition() != null && creditTransaction.getPetition().getId() != null) {
-                creditTransaction.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(creditTransaction.getPetition().getId())));
+            if (creditTransaction.getPetition() != null && creditTransaction.getPetition().getId() > 0) {
+                creditTransaction.setPetition(petitionGenericService.get(Petition.class, creditTransaction.getPetition().getId()));
             }
             
             if (authentication != null) {
@@ -100,17 +100,17 @@ public class CreditTransactionController {
     public ResponseEntity<MainDto> modifyCreditTransaction(@RequestBody CreditTransaction creditTransaction, Authentication authentication) {
         try {
             // Set relationships
-            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() != null) {
-                creditTransaction.setUser(userGenericService.get(User.class, Long.parseLong(creditTransaction.getUser().getId())));
+            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() > 0) {
+                creditTransaction.setUser(userGenericService.get(User.class, creditTransaction.getUser().getId()));
             }
-            if (creditTransaction.getWallet() != null && creditTransaction.getWallet().getId() != null) {
-                creditTransaction.setWallet(creditWalletGenericService.get(CreditWallet.class, Long.parseLong(creditTransaction.getWallet().getId())));
+            if (creditTransaction.getWallet() != null && creditTransaction.getWallet().getId() > 0) {
+                creditTransaction.setWallet(creditWalletGenericService.get(CreditWallet.class, creditTransaction.getWallet().getId()));
             }
-            if (creditTransaction.getUserOrder() != null && creditTransaction.getUserOrder().getId() != null) {
-                creditTransaction.setUserOrder(userOrderGenericService.get(UserOrder.class, Long.parseLong(creditTransaction.getUserOrder().getId())));
+            if (creditTransaction.getUserOrder() != null && creditTransaction.getUserOrder().getId() > 0) {
+                creditTransaction.setUserOrder(userOrderGenericService.get(UserOrder.class, creditTransaction.getUserOrder().getId()));
             }
-            if (creditTransaction.getPetition() != null && creditTransaction.getPetition().getId() != null) {
-                creditTransaction.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(creditTransaction.getPetition().getId())));
+            if (creditTransaction.getPetition() != null && creditTransaction.getPetition().getId() > 0) {
+                creditTransaction.setPetition(petitionGenericService.get(Petition.class, creditTransaction.getPetition().getId()));
             }
             
             if (authentication != null) {

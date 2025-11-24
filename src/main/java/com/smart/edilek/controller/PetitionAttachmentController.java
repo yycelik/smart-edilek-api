@@ -52,8 +52,8 @@ public class PetitionAttachmentController {
     public ResponseEntity<MainDto> addPetitionAttachment(@RequestBody PetitionAttachment petitionAttachment, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionAttachment.getPetition() != null && petitionAttachment.getPetition().getId() != null) {
-                petitionAttachment.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionAttachment.getPetition().getId())));
+            if (petitionAttachment.getPetition() != null && petitionAttachment.getPetition().getId() > 0) {
+                petitionAttachment.setPetition(petitionGenericService.get(Petition.class, petitionAttachment.getPetition().getId()));
             }
 
             petitionAttachmentGenericService.add(petitionAttachment);
@@ -71,8 +71,8 @@ public class PetitionAttachmentController {
     public ResponseEntity<MainDto> modifyPetitionAttachment(@RequestBody PetitionAttachment petitionAttachment, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionAttachment.getPetition() != null && petitionAttachment.getPetition().getId() != null) {
-                petitionAttachment.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionAttachment.getPetition().getId())));
+            if (petitionAttachment.getPetition() != null && petitionAttachment.getPetition().getId() > 0) {
+                petitionAttachment.setPetition(petitionGenericService.get(Petition.class, petitionAttachment.getPetition().getId()));
             }
 
             petitionAttachment = petitionAttachmentGenericService.modify(petitionAttachment);

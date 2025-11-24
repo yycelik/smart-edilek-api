@@ -52,8 +52,8 @@ public class PetitionTypeInfoController {
     public ResponseEntity<MainDto> addPetitionTypeInfo(@RequestBody PetitionTypeInfo petitionTypeInfo, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionTypeInfo.getPetition() != null && petitionTypeInfo.getPetition().getId() != null) {
-                petitionTypeInfo.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionTypeInfo.getPetition().getId())));
+            if (petitionTypeInfo.getPetition() != null && petitionTypeInfo.getPetition().getId() > 0) {
+                petitionTypeInfo.setPetition(petitionGenericService.get(Petition.class, petitionTypeInfo.getPetition().getId()));
             }
 
             petitionTypeInfoGenericService.add(petitionTypeInfo);
@@ -71,8 +71,8 @@ public class PetitionTypeInfoController {
     public ResponseEntity<MainDto> modifyPetitionTypeInfo(@RequestBody PetitionTypeInfo petitionTypeInfo, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionTypeInfo.getPetition() != null && petitionTypeInfo.getPetition().getId() != null) {
-                petitionTypeInfo.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionTypeInfo.getPetition().getId())));
+            if (petitionTypeInfo.getPetition() != null && petitionTypeInfo.getPetition().getId() > 0) {
+                petitionTypeInfo.setPetition(petitionGenericService.get(Petition.class, petitionTypeInfo.getPetition().getId()));
             }
 
             petitionTypeInfo = petitionTypeInfoGenericService.modify(petitionTypeInfo);

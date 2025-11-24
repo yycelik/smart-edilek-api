@@ -52,8 +52,8 @@ public class CreditWalletController {
     public ResponseEntity<MainDto> addCreditWallet(@RequestBody CreditWallet creditWallet, Authentication authentication) {
         try {
             // Set relationships
-            if (creditWallet.getUser() != null && creditWallet.getUser().getId() != null) {
-                creditWallet.setUser(userGenericService.get(User.class, Long.parseLong(creditWallet.getUser().getId())));
+            if (creditWallet.getUser() != null && creditWallet.getUser().getId() > 0) {
+                creditWallet.setUser(userGenericService.get(User.class, creditWallet.getUser().getId()));
             }
             
             if (authentication != null) {
@@ -79,8 +79,8 @@ public class CreditWalletController {
     public ResponseEntity<MainDto> modifyCreditWallet(@RequestBody CreditWallet creditWallet, Authentication authentication) {
         try {
             // Set relationships
-            if (creditWallet.getUser() != null && creditWallet.getUser().getId() != null) {
-                creditWallet.setUser(userGenericService.get(User.class, Long.parseLong(creditWallet.getUser().getId())));
+            if (creditWallet.getUser() != null && creditWallet.getUser().getId() > 0) {
+                creditWallet.setUser(userGenericService.get(User.class, creditWallet.getUser().getId()));
             }
             
             if (authentication != null) {

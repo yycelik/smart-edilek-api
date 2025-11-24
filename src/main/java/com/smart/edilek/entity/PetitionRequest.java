@@ -24,8 +24,8 @@ public class PetitionRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="id", length = 255)
-	private String id;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private long id;
 
 	@ManyToOne
 	@JoinColumn(name="petition_id", nullable = false)

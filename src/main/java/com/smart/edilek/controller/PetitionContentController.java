@@ -52,8 +52,8 @@ public class PetitionContentController {
     public ResponseEntity<MainDto> addPetitionContent(@RequestBody PetitionContent petitionContent, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionContent.getPetition() != null && petitionContent.getPetition().getId() != null) {
-                petitionContent.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionContent.getPetition().getId())));
+            if (petitionContent.getPetition() != null && petitionContent.getPetition().getId() > 0) {
+                petitionContent.setPetition(petitionGenericService.get(Petition.class, petitionContent.getPetition().getId()));
             }
 
             petitionContentGenericService.add(petitionContent);
@@ -71,8 +71,8 @@ public class PetitionContentController {
     public ResponseEntity<MainDto> modifyPetitionContent(@RequestBody PetitionContent petitionContent, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionContent.getPetition() != null && petitionContent.getPetition().getId() != null) {
-                petitionContent.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionContent.getPetition().getId())));
+            if (petitionContent.getPetition() != null && petitionContent.getPetition().getId() > 0) {
+                petitionContent.setPetition(petitionGenericService.get(Petition.class, petitionContent.getPetition().getId()));
             }
 
             petitionContent = petitionContentGenericService.modify(petitionContent);

@@ -24,8 +24,8 @@ public class LicensePackage implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="id", length = 255)
-	private String id;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private long id;
 
 	@Column(name="code", nullable = false, length = 50)
 	private String code;

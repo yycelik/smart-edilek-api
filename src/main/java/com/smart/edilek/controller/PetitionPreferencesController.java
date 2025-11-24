@@ -52,8 +52,8 @@ public class PetitionPreferencesController {
     public ResponseEntity<MainDto> addPetitionPreferences(@RequestBody PetitionPreferences petitionPreferences, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionPreferences.getPetition() != null && petitionPreferences.getPetition().getId() != null) {
-                petitionPreferences.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionPreferences.getPetition().getId())));
+            if (petitionPreferences.getPetition() != null && petitionPreferences.getPetition().getId() > 0) {
+                petitionPreferences.setPetition(petitionGenericService.get(Petition.class, petitionPreferences.getPetition().getId()));
             }
 
             petitionPreferencesGenericService.add(petitionPreferences);
@@ -71,8 +71,8 @@ public class PetitionPreferencesController {
     public ResponseEntity<MainDto> modifyPetitionPreferences(@RequestBody PetitionPreferences petitionPreferences, Authentication authentication) {
         try {
             // Set relationships
-            if (petitionPreferences.getPetition() != null && petitionPreferences.getPetition().getId() != null) {
-                petitionPreferences.setPetition(petitionGenericService.get(Petition.class, Long.parseLong(petitionPreferences.getPetition().getId())));
+            if (petitionPreferences.getPetition() != null && petitionPreferences.getPetition().getId() > 0) {
+                petitionPreferences.setPetition(petitionGenericService.get(Petition.class, petitionPreferences.getPetition().getId()));
             }
 
             petitionPreferences = petitionPreferencesGenericService.modify(petitionPreferences);

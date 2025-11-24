@@ -56,11 +56,11 @@ public class UserOrderController {
     public ResponseEntity<MainDto> addUserOrder(@RequestBody UserOrder userOrder, Authentication authentication) {
         try {
             // Set relationships
-            if (userOrder.getUser() != null && userOrder.getUser().getId() != null) {
-                userOrder.setUser(userGenericService.get(User.class, Long.parseLong(userOrder.getUser().getId())));
+            if (userOrder.getUser() != null && userOrder.getUser().getId() > 0) {
+                userOrder.setUser(userGenericService.get(User.class, userOrder.getUser().getId()));
             }
-            if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() != null) {
-                userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, Long.parseLong(userOrder.getLicensePackage().getId())));
+            if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
+                userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId()));
             }
             
             if (authentication != null) {
@@ -86,11 +86,11 @@ public class UserOrderController {
     public ResponseEntity<MainDto> modifyUserOrder(@RequestBody UserOrder userOrder, Authentication authentication) {
         try {
             // Set relationships
-            if (userOrder.getUser() != null && userOrder.getUser().getId() != null) {
-                userOrder.setUser(userGenericService.get(User.class, Long.parseLong(userOrder.getUser().getId())));
+            if (userOrder.getUser() != null && userOrder.getUser().getId() > 0) {
+                userOrder.setUser(userGenericService.get(User.class, userOrder.getUser().getId()));
             }
-            if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() != null) {
-                userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, Long.parseLong(userOrder.getLicensePackage().getId())));
+            if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
+                userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId()));
             }
             
             if (authentication != null) {

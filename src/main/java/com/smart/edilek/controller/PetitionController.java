@@ -52,8 +52,8 @@ public class PetitionController {
     public ResponseEntity<MainDto> addPetition(@RequestBody Petition petition, Authentication authentication) {
         try {
             // Set relationships
-            if (petition.getUser() != null && petition.getUser().getId() != null) {
-                petition.setUser(userGenericService.get(User.class, Long.parseLong(petition.getUser().getId())));
+            if (petition.getUser() != null && petition.getUser().getId() > 0) {
+                petition.setUser(userGenericService.get(User.class, petition.getUser().getId()));
             }
 
             petitionGenericService.add(petition);
@@ -71,8 +71,8 @@ public class PetitionController {
     public ResponseEntity<MainDto> modifyPetition(@RequestBody Petition petition, Authentication authentication) {
         try {
             // Set relationships
-            if (petition.getUser() != null && petition.getUser().getId() != null) {
-                petition.setUser(userGenericService.get(User.class, Long.parseLong(petition.getUser().getId())));
+            if (petition.getUser() != null && petition.getUser().getId() > 0) {
+                petition.setUser(userGenericService.get(User.class, petition.getUser().getId()));
             }
 
             petition = petitionGenericService.modify(petition);

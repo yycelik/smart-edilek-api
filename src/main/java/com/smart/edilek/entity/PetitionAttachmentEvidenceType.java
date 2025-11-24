@@ -22,8 +22,8 @@ public class PetitionAttachmentEvidenceType implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name="id", length = 255)
-	private String id;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private long id;
 
 	@ManyToOne
 	@JoinColumn(name="petition_attachment_id", nullable = false)
