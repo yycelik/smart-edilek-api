@@ -103,9 +103,9 @@ public class PetitionPreferencesController {
         return new ResponseEntity<PetitionPreferencesDto>(petitionPreferencesDto, HttpStatus.OK);
     }
     
-    @GetMapping("/list/{lazyEvent}")
+    @PostMapping("/list")
     @Operation(summary = "Get paginated list of petition preferences", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<PetitionPreferencesDto>> find(@PathVariable("lazyEvent") LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<PetitionPreferencesDto>> find(@RequestBody LazyEvent lazyEvent) {
         List<PetitionPreferences> petitionPreferencesList = null;
         long count = 0;
         try {

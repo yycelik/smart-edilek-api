@@ -104,9 +104,9 @@ public class LicenseController {
         return new ResponseEntity<LicensePackageDto>(licenseDto, HttpStatus.OK);
     }
     
-    @GetMapping("/list/{lazyEvent}")
+    @PostMapping("/list")
     @Operation(summary = "Get paginated list of license packages", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<LicensePackageDto>> find(@PathVariable("lazyEvent") LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<LicensePackageDto>> find(@RequestBody LazyEvent lazyEvent) {
         List<LicensePackage> licenseList = null;
         long count = 0;
         try {

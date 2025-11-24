@@ -118,9 +118,9 @@ public class CreditWalletController {
         return new ResponseEntity<CreditWalletDto>(creditWalletDto, HttpStatus.OK);
     }
     
-    @GetMapping("/list/{lazyEvent}")
+    @PostMapping("/list")
     @Operation(summary = "Get paginated list of credit wallets", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<CreditWalletDto>> find(@PathVariable("lazyEvent") LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<CreditWalletDto>> find(@RequestBody LazyEvent lazyEvent) {
         List<CreditWallet> creditWalletList = null;
         long count = 0;
         try {

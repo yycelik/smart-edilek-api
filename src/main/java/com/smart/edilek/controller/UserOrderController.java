@@ -128,9 +128,9 @@ public class UserOrderController {
         return new ResponseEntity<UserOrderDto>(userOrderDto, HttpStatus.OK);
     }
     
-    @GetMapping("/list/{lazyEvent}")
+    @PostMapping("/list")
     @Operation(summary = "Get paginated list of user orders", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<UserOrderDto>> find(@PathVariable("lazyEvent") LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<UserOrderDto>> find(@RequestBody LazyEvent lazyEvent) {
         List<UserOrder> userOrderList = null;
         long count = 0;
         try {

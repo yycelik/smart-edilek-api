@@ -103,9 +103,9 @@ public class PetitionTypeInfoController {
         return new ResponseEntity<PetitionTypeInfoDto>(petitionTypeInfoDto, HttpStatus.OK);
     }
     
-    @GetMapping("/list/{lazyEvent}")
+    @PostMapping("/list")
     @Operation(summary = "Get paginated list of petition type info", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<PetitionTypeInfoDto>> find(@PathVariable("lazyEvent") LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<PetitionTypeInfoDto>> find(@RequestBody LazyEvent lazyEvent) {
         List<PetitionTypeInfo> petitionTypeInfoList = null;
         long count = 0;
         try {

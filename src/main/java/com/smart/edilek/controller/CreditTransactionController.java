@@ -148,9 +148,9 @@ public class CreditTransactionController {
         return new ResponseEntity<CreditTransactionDto>(creditTransactionDto, HttpStatus.OK);
     }
     
-    @GetMapping("/list/{lazyEvent}")
+    @PostMapping("/list")
     @Operation(summary = "Get paginated list of credit transactions", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<CreditTransactionDto>> find(@PathVariable("lazyEvent") LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<CreditTransactionDto>> find(@RequestBody LazyEvent lazyEvent) {
         List<CreditTransaction> creditTransactionList = null;
         long count = 0;
         try {
