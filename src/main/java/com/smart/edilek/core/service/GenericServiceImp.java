@@ -86,8 +86,8 @@ public class GenericServiceImp<T> implements GenericService<T> {
 
         // set max rows, first element, and page
         lazyEvent.setRows(rows);
-        lazyEvent.setFirst(0);
-        lazyEvent.setPage(1);
+        lazyEvent.setFirst(0); // mysql start with 0
+        lazyEvent.setPage(0); // mysql start with 0
 
         return genericDao.find(tClass, lazyEvent);
     }
