@@ -38,6 +38,28 @@ public class KeycloakJwtUtils {
     }
 
     /**
+     * Extract user first name from Keycloak JWT token
+     */
+    public String getFirstNameFromJwtToken(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            Jwt jwt = jwtAuth.getToken();
+            return jwt.getClaimAsString("given_name");
+        }
+        return null;
+    }
+
+    /**
+     * Extract user last name from Keycloak JWT token
+     */
+    public String getLastNameFromJwtToken(Authentication authentication) {
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            Jwt jwt = jwtAuth.getToken();
+            return jwt.getClaimAsString("family_name");
+        }
+        return null;
+    }
+
+    /**
      * Extract user roles from Keycloak JWT token
      */
     public Collection<String> getRolesFromJwtToken(Authentication authentication) {

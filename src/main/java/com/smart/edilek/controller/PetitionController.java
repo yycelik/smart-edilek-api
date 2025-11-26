@@ -23,7 +23,6 @@ import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
 import com.smart.edilek.models.PetitionDto;
-import com.smart.edilek.security.jwt.KeycloakJwtUtils;
 import com.smart.edilek.core.service.GenericServiceImp;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,16 +42,13 @@ public class PetitionController {
 
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private KeycloakJwtUtils keycloakJwtUtils;
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new petition", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<MainDto> addPetition(@RequestBody Petition petition, Authentication authentication) {
         try {
             // Set relationships
-            if (petition.getUser() != null && petition.getUser().getId() > 0) {
+            if (petition.getUser() != null && petition.getUser().getId() != null && !petition.getUser().getId().isEmpty()) {
                 petition.setUser(userGenericService.get(User.class, petition.getUser().getId()));
             }
 
@@ -71,7 +67,7 @@ public class PetitionController {
     public ResponseEntity<MainDto> modifyPetition(@RequestBody Petition petition, Authentication authentication) {
         try {
             // Set relationships
-            if (petition.getUser() != null && petition.getUser().getId() > 0) {
+            if (petition.getUser() != null && petition.getUser().getId() != null && !petition.getUser().getId().isEmpty()) {
                 petition.setUser(userGenericService.get(User.class, petition.getUser().getId()));
             }
 

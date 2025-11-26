@@ -64,7 +64,7 @@ public class CreditTransactionController {
     public ResponseEntity<MainDto> addCreditTransaction(@RequestBody CreditTransaction creditTransaction, Authentication authentication) {
         try {
             // Set relationships
-            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() > 0) {
+            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() != null && !creditTransaction.getUser().getId().isEmpty()) {
                 creditTransaction.setUser(userGenericService.get(User.class, creditTransaction.getUser().getId()));
             }
             if (creditTransaction.getWallet() != null && creditTransaction.getWallet().getId() > 0) {
@@ -100,7 +100,7 @@ public class CreditTransactionController {
     public ResponseEntity<MainDto> modifyCreditTransaction(@RequestBody CreditTransaction creditTransaction, Authentication authentication) {
         try {
             // Set relationships
-            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() > 0) {
+            if (creditTransaction.getUser() != null && creditTransaction.getUser().getId() != null && !creditTransaction.getUser().getId().isEmpty()) {
                 creditTransaction.setUser(userGenericService.get(User.class, creditTransaction.getUser().getId()));
             }
             if (creditTransaction.getWallet() != null && creditTransaction.getWallet().getId() > 0) {

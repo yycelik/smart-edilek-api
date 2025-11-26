@@ -83,10 +83,6 @@ public class Petition implements Serializable {
 	@OneToOne(mappedBy="petition", cascade = CascadeType.ALL)
 	private PetitionTypeInfo petitionTypeInfo;
 
-	//bi-directional one-to-one association to PetitionContent
-	@OneToOne(mappedBy="petition", cascade = CascadeType.ALL)
-	private PetitionContent petitionContent;
-
 	//bi-directional one-to-many association to PetitionRequest
 	@OneToMany(mappedBy="petition", cascade = CascadeType.ALL)
 	private List<PetitionRequest> petitionRequests;

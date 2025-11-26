@@ -23,7 +23,6 @@ import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
 import com.smart.edilek.models.PetitionAttachmentDto;
-import com.smart.edilek.security.jwt.KeycloakJwtUtils;
 import com.smart.edilek.core.service.GenericServiceImp;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,9 +42,6 @@ public class PetitionAttachmentController {
 
     @Autowired
     private ModelMapper modelMapper;
-
-    @Autowired
-    private KeycloakJwtUtils keycloakJwtUtils;
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new petition attachment", security = @SecurityRequirement(name = "bearerAuth"))

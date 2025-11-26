@@ -22,7 +22,9 @@ import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
 import com.smart.edilek.models.UserDto;
+import com.smart.edilek.models.UserSyncRequest;
 import com.smart.edilek.security.jwt.KeycloakJwtUtils;
+import com.smart.edilek.service.UserService;
 import com.smart.edilek.core.service.GenericServiceImp;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,10 +40,59 @@ public class UserController {
     private GenericServiceImp<User> userGenericService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private KeycloakJwtUtils keycloakJwtUtils;
+    
+    @PostMapping(value = "/sync")
+    @Operation(summary = "Sync user from Keycloak to database", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<UserDto> syncUser(@RequestBody UserSyncRequest request, Authentication authentication) {
+        try {
+            // Extract keycloakId from JWT token if not provided in request
+            if (request.getKeycloakId() == null || request.getKeycloakId().isEmpty()) {
+                if (authentication != null) {
+                    String keycloakId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
+                    request.setKeycloakId(keycloakId);
+                } else {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+            }
+
+            // Extract user info from JWT token if not provided
+            if (authentication != null) {
+                if (request.getUsername() == null || request.getUsername().isEmpty()) {
+                    String username = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
+                    request.setUsername(username);
+                }
+                if (request.getFirstname() == null || request.getFirstname().isEmpty()) {
+                    String firstname = keycloakJwtUtils.getFirstNameFromJwtToken(authentication);
+                    request.setFirstname(firstname);
+                }
+                if (request.getLastname() == null || request.getLastname().isEmpty()) {
+                    String lastname = keycloakJwtUtils.getLastNameFromJwtToken(authentication);
+                    request.setLastname(lastname);
+                }
+                if (request.getEmail() == null || request.getEmail().isEmpty()) {
+                    String email = keycloakJwtUtils.getEmailFromJwtToken(authentication);
+                    request.setEmail(email);
+                }
+            }
+
+            // Sync user to database
+            User user = userService.syncUserFromKeycloak(request);
+            
+            UserDto userDto = modelMapper.map(user, UserDto.class);
+            return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new user", security = @SecurityRequirement(name = "bearerAuth"))

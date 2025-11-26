@@ -1,6 +1,9 @@
 package com.smart.edilek.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -23,6 +26,8 @@ import com.smart.edilek.entity.LicensePackage;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
+import com.smart.edilek.core.models.FilterMeta;
+import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.models.UserOrderDto;
 import com.smart.edilek.security.jwt.KeycloakJwtUtils;
 import com.smart.edilek.core.service.GenericServiceImp;
@@ -56,7 +61,7 @@ public class UserOrderController {
     public ResponseEntity<MainDto> addUserOrder(@RequestBody UserOrder userOrder, Authentication authentication) {
         try {
             // Set relationships
-            if (userOrder.getUser() != null && userOrder.getUser().getId() > 0) {
+            if (userOrder.getUser() != null && userOrder.getUser().getId() != null && !userOrder.getUser().getId().isEmpty()) {
                 userOrder.setUser(userGenericService.get(User.class, userOrder.getUser().getId()));
             }
             if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
@@ -86,7 +91,7 @@ public class UserOrderController {
     public ResponseEntity<MainDto> modifyUserOrder(@RequestBody UserOrder userOrder, Authentication authentication) {
         try {
             // Set relationships
-            if (userOrder.getUser() != null && userOrder.getUser().getId() > 0) {
+            if (userOrder.getUser() != null && userOrder.getUser().getId() != null && !userOrder.getUser().getId().isEmpty()) {
                 userOrder.setUser(userGenericService.get(User.class, userOrder.getUser().getId()));
             }
             if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
@@ -130,10 +135,35 @@ public class UserOrderController {
     
     @PostMapping("/list")
     @Operation(summary = "Get paginated list of user orders", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<UserOrderDto>> find(@RequestBody LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<UserOrderDto>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<UserOrder> userOrderList = null;
         long count = 0;
         try {
+            // Add user_id filter for authenticated user
+            if (authentication != null) {
+                String userId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
+                if (userId != null) {
+                    Map<String, FilterMeta> filters = lazyEvent.getFilters();
+                    if (filters == null) {
+                        filters = new HashMap<>();
+                        lazyEvent.setFilters(filters);
+                    }
+                    
+                    Constraint constraint = new Constraint();
+                    constraint.setValue(userId);
+                    constraint.setMatchMode("equals");
+                    
+                    List<Constraint> constraints = new ArrayList<>();
+                    constraints.add(constraint);
+                    
+                    FilterMeta filterMeta = new FilterMeta();
+                    filterMeta.setOperator("and");
+                    filterMeta.setConstraints(constraints);
+                    
+                    filters.put("user.id", filterMeta);
+                }
+            }
+            
             userOrderList = userOrderGenericService.find(UserOrder.class, lazyEvent);
             count = userOrderGenericService.count(UserOrder.class, lazyEvent);
         } catch (Exception e) {

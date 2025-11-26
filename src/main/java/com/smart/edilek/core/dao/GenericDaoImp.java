@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
-import com.smart.edilek.core.dao.GenericDao;
 import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.FilterMeta;
 import com.smart.edilek.core.models.LazyEvent;

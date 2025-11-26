@@ -53,9 +53,6 @@ public class PetitionDto {
 	private PetitionTypeInfoDto petitionTypeInfo;
 
 	@Getter @Setter
-	private PetitionContentDto petitionContent;
-
-	@Getter @Setter
 	private List<PetitionRequestDto> petitionRequests;
 
 	@Getter @Setter
