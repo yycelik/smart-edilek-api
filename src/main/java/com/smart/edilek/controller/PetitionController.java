@@ -1,6 +1,7 @@
 package com.smart.edilek.controller;
 
 import java.util.List;
+import java.util.HashMap;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smart.edilek.entity.Petition;
 import com.smart.edilek.entity.User;
+import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
+import com.smart.edilek.core.models.FilterMeta;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
 import com.smart.edilek.models.PetitionDto;
@@ -58,7 +61,11 @@ public class PetitionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
-        MainDto petitionDto = modelMapper.map(petition, MainDto.class);
+        MainDto petitionDto = new MainDto();
+        petitionDto.setId((int) petition.getId());
+        petitionDto.setActive(petition.getActive());
+        petitionDto.setName(petition.getTitle());
+        
         return new ResponseEntity<MainDto>(petitionDto, HttpStatus.CREATED);
     }
     
@@ -77,7 +84,11 @@ public class PetitionController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
-        MainDto petitionDto = modelMapper.map(petition, MainDto.class);
+        MainDto petitionDto = new MainDto();
+        petitionDto.setId((int) petition.getId());
+        petitionDto.setActive(petition.getActive());
+        petitionDto.setName(petition.getTitle());
+        
         return new ResponseEntity<MainDto>(petitionDto, HttpStatus.OK);
     }
     
@@ -101,10 +112,27 @@ public class PetitionController {
     
     @PostMapping("/list")
     @Operation(summary = "Get paginated list of petitions", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<PetitionDto>> find(@RequestBody LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<PetitionDto>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<Petition> petitionList = null;
         long count = 0;
         try {
+            if (authentication != null && authentication.getName() != null) {
+                if (lazyEvent.getFilters() == null) {
+                    lazyEvent.setFilters(new HashMap<>());
+                }
+                
+                FilterMeta filterMeta = new FilterMeta();
+                filterMeta.setOperator("and");
+                
+                Constraint constraint = new Constraint();
+                constraint.setValue(authentication.getName());
+                constraint.setMatchMode("equals");
+                
+                filterMeta.setConstraints(List.of(constraint));
+                
+                lazyEvent.getFilters().put("user.id", filterMeta);
+            }
+
             petitionList = petitionGenericService.find(Petition.class, lazyEvent);
             count = petitionGenericService.count(Petition.class, lazyEvent);
         } catch (Exception e) {
@@ -158,7 +186,11 @@ public class PetitionController {
             
             petition = petitionGenericService.modify(petition);
             
-            MainDto petitionDto = modelMapper.map(petition, MainDto.class);
+            MainDto petitionDto = new MainDto();
+            petitionDto.setId((int) petition.getId());
+            petitionDto.setActive(petition.getActive());
+            petitionDto.setName(petition.getTitle());
+            
             return new ResponseEntity<MainDto>(petitionDto, HttpStatus.OK);
             
         } catch (Exception e) {
