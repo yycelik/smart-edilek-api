@@ -1,6 +1,10 @@
 package com.smart.edilek.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -19,7 +23,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smart.edilek.entity.CreditWallet;
 import com.smart.edilek.entity.User;
+import com.smart.edilek.core.enumObject.MatchMode;
+import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
+import com.smart.edilek.core.models.FilterMeta;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
 import com.smart.edilek.models.CreditWalletDto;
@@ -47,13 +54,39 @@ public class CreditWalletController {
     @Autowired
     private KeycloakJwtUtils keycloakJwtUtils;
     
+    private boolean isAdmin(Authentication authentication) {
+        if (authentication == null) return false;
+        Collection<String> roles = keycloakJwtUtils.getRealmRolesFromJwtToken(authentication);
+        return roles != null && roles.contains("admin");
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+        String username = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
+        if (username == null) return null;
+        List<User> users = userGenericService.find(User.class, "username", username, MatchMode.equals, 1);
+        if (users != null && !users.isEmpty()) {
+            return users.get(0);
+        }
+        return null;
+    }
+    
     @PostMapping(value = "/add")
     @Operation(summary = "Add new credit wallet", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<MainDto> addCreditWallet(@RequestBody CreditWallet creditWallet, Authentication authentication) {
         try {
-            // Set relationships
-            if (creditWallet.getUser() != null && creditWallet.getUser().getId() != null && !creditWallet.getUser().getId().isEmpty()) {
-                creditWallet.setUser(userGenericService.get(User.class, creditWallet.getUser().getId()));
+            boolean isAdmin = isAdmin(authentication);
+            User currentUser = getCurrentUser(authentication);
+
+            if (!isAdmin) {
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+                creditWallet.setUser(currentUser);
+            } else {
+                // Set relationships
+                if (creditWallet.getUser() != null && creditWallet.getUser().getId() != null && !creditWallet.getUser().getId().isEmpty()) {
+                    creditWallet.setUser(userGenericService.get(User.class, creditWallet.getUser().getId()));
+                }
             }
             
             if (authentication != null) {
@@ -78,9 +111,27 @@ public class CreditWalletController {
     @Operation(summary = "Modify existing credit wallet", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<MainDto> modifyCreditWallet(@RequestBody CreditWallet creditWallet, Authentication authentication) {
         try {
-            // Set relationships
-            if (creditWallet.getUser() != null && creditWallet.getUser().getId() != null && !creditWallet.getUser().getId().isEmpty()) {
-                creditWallet.setUser(userGenericService.get(User.class, creditWallet.getUser().getId()));
+            boolean isAdmin = isAdmin(authentication);
+            User currentUser = getCurrentUser(authentication);
+
+            CreditWallet existingWallet = creditWalletGenericService.get(CreditWallet.class, creditWallet.getId());
+            if (existingWallet == null) {
+                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            if (!isAdmin) {
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+                if (existingWallet.getUser() == null || !existingWallet.getUser().getId().equals(currentUser.getId())) {
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
+                creditWallet.setUser(currentUser);
+            } else {
+                // Set relationships
+                if (creditWallet.getUser() != null && creditWallet.getUser().getId() != null && !creditWallet.getUser().getId().isEmpty()) {
+                    creditWallet.setUser(userGenericService.get(User.class, creditWallet.getUser().getId()));
+                }
             }
             
             if (authentication != null) {
@@ -102,12 +153,23 @@ public class CreditWalletController {
     
     @GetMapping("/get/{id}")
     @Operation(summary = "Get credit wallet by ID", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<CreditWalletDto> getCreditWallet(@PathVariable String id) {
+    public ResponseEntity<CreditWalletDto> getCreditWallet(@PathVariable String id, Authentication authentication) {
         CreditWallet creditWallet = null;
         try {
             creditWallet = creditWalletGenericService.get(CreditWallet.class, Long.parseLong(id));
             if (creditWallet == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                User currentUser = getCurrentUser(authentication);
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+                if (creditWallet.getUser() == null || !creditWallet.getUser().getId().equals(currentUser.getId())) {
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,10 +182,33 @@ public class CreditWalletController {
     
     @PostMapping("/list")
     @Operation(summary = "Get paginated list of credit wallets", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<CreditWalletDto>> find(@RequestBody LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<CreditWalletDto>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<CreditWallet> creditWalletList = null;
         long count = 0;
         try {
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                User currentUser = getCurrentUser(authentication);
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+                
+                if (lazyEvent.getFilters() == null) {
+                    lazyEvent.setFilters(new HashMap<>());
+                }
+                
+                FilterMeta filterMeta = new FilterMeta();
+                filterMeta.setOperator("and");
+                List<Constraint> constraints = new ArrayList<>();
+                Constraint constraint = new Constraint();
+                constraint.setValue(currentUser.getUsername());
+                constraint.setMatchMode(MatchMode.equals.toString());
+                constraints.add(constraint);
+                filterMeta.setConstraints(constraints);
+                
+                lazyEvent.getFilters().put("user.username", filterMeta);
+            }
+
             creditWalletList = creditWalletGenericService.find(CreditWallet.class, lazyEvent);
             count = creditWalletGenericService.count(CreditWallet.class, lazyEvent);
         } catch (Exception e) {
@@ -141,12 +226,38 @@ public class CreditWalletController {
 
     @GetMapping("/list/all")
     @Operation(summary = "Get all active credit wallets", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<CreditWalletDto>> getAllActive() {
+    public ResponseEntity<List<CreditWalletDto>> getAllActive(Authentication authentication) {
         try {
+            boolean isAdmin = isAdmin(authentication);
+            User currentUser = null;
+            if (!isAdmin) {
+                currentUser = getCurrentUser(authentication);
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+            }
+
             LazyEvent lazyEvent = new LazyEvent();
             lazyEvent.setFirst(0);
             lazyEvent.setRows(1000);
             lazyEvent.setPage(0);
+            
+            if (!isAdmin) {
+                 if (lazyEvent.getFilters() == null) {
+                    lazyEvent.setFilters(new HashMap<>());
+                }
+                
+                FilterMeta filterMeta = new FilterMeta();
+                filterMeta.setOperator("and");
+                List<Constraint> constraints = new ArrayList<>();
+                Constraint constraint = new Constraint();
+                constraint.setValue(currentUser.getUsername());
+                constraint.setMatchMode(MatchMode.equals.toString());
+                constraints.add(constraint);
+                filterMeta.setConstraints(constraints);
+                
+                lazyEvent.getFilters().put("user.username", filterMeta);
+            }
             
             List<CreditWallet> creditWalletList = creditWalletGenericService.find(CreditWallet.class, lazyEvent);
             
@@ -170,6 +281,17 @@ public class CreditWalletController {
             CreditWallet creditWallet = creditWalletGenericService.get(CreditWallet.class, Long.parseLong(id));
             if (creditWallet == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                User currentUser = getCurrentUser(authentication);
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+                if (creditWallet.getUser() == null || !creditWallet.getUser().getId().equals(currentUser.getId())) {
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
             }
             
             // Soft delete - just set active to false
