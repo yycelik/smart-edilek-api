@@ -1,6 +1,10 @@
 package com.smart.edilek.controller;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -18,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smart.edilek.entity.User;
+import com.smart.edilek.core.enumObject.MatchMode;
+import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
+import com.smart.edilek.core.models.FilterMeta;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
 import com.smart.edilek.models.UserDto;
@@ -47,6 +54,22 @@ public class UserController {
 
     @Autowired
     private KeycloakJwtUtils keycloakJwtUtils;
+    
+    private boolean isAdmin(Authentication authentication) {
+        if (authentication == null) return false;
+        Collection<String> roles = keycloakJwtUtils.getRealmRolesFromJwtToken(authentication);
+        return roles != null && roles.stream().anyMatch(role -> role.equalsIgnoreCase("ADMIN"));
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+        String username = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
+        if (username == null) return null;
+        List<User> users = userGenericService.find(User.class, "username", username, MatchMode.equals, 1);
+        if (users != null && !users.isEmpty()) {
+            return users.get(0);
+        }
+        return null;
+    }
     
     @PostMapping(value = "/sync")
     @Operation(summary = "Sync user from Keycloak to database", security = @SecurityRequirement(name = "bearerAuth"))
@@ -96,40 +119,70 @@ public class UserController {
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new user", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<MainDto> addUser(@RequestBody User user, Authentication authentication) {
+    public ResponseEntity<UserDto> addUser(@RequestBody User user, Authentication authentication) {
         try {
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                 String tokenUsername = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
+                 if (tokenUsername == null || !tokenUsername.equals(user.getUsername())) {
+                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                 }
+            }
             userGenericService.add(user);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
-        MainDto userDto = modelMapper.map(user, MainDto.class);
-        return new ResponseEntity<MainDto>(userDto, HttpStatus.CREATED);
+        UserDto userDto = modelMapper.map(user, UserDto.class);
+        return new ResponseEntity<UserDto>(userDto, HttpStatus.CREATED);
     }
     
     @PutMapping(value = "/modify")
     @Operation(summary = "Modify existing user", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<MainDto> modifyUser(@RequestBody User user, Authentication authentication) {
+    public ResponseEntity<UserDto> modifyUser(@RequestBody User user, Authentication authentication) {
         try {
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                User currentUser = getCurrentUser(authentication);
+                if (currentUser == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                
+                // Check if trying to modify someone else
+                if (user.getId() != null && !currentUser.getId().equals(user.getId())) {
+                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
+                // If ID is not provided in body but username is, check username
+                if (user.getId() == null && user.getUsername() != null && !currentUser.getUsername().equals(user.getUsername())) {
+                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
+            }
             user = userGenericService.modify(user);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         
-        MainDto userDto = modelMapper.map(user, MainDto.class);
-        return new ResponseEntity<MainDto>(userDto, HttpStatus.OK);
+        UserDto userDto = modelMapper.map(user, UserDto.class);
+        return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);
     }
     
     @GetMapping("/get/{id}")
     @Operation(summary = "Get user by ID", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<UserDto> getUser(@PathVariable String id) {
+    public ResponseEntity<UserDto> getUser(@PathVariable String id, Authentication authentication) {
         User user = null;
         try {
-            user = userGenericService.get(User.class, Long.parseLong(id));
+            user = userGenericService.get(User.class, id);
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                User currentUser = getCurrentUser(authentication);
+                if (currentUser == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                if (!currentUser.getId().equals(user.getId())) {
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,10 +195,14 @@ public class UserController {
     
     @PostMapping("/list")
     @Operation(summary = "Get paginated list of users", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<UserDto>> find(@RequestBody LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<UserDto>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<User> userList = null;
         long count = 0;
         try {
+            if (!isAdmin(authentication)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+
             userList = userGenericService.find(User.class, lazyEvent);
             count = userGenericService.count(User.class, lazyEvent);
         } catch (Exception e) {
@@ -161,14 +218,42 @@ public class UserController {
         return new ResponseEntity<DataTableDto<UserDto>>(dataTableDto, HttpStatus.OK);
     }
 
+
+
     @GetMapping("/list/all")
     @Operation(summary = "Get all active users", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<List<UserDto>> getAllActive() {
+    public ResponseEntity<List<UserDto>> getAllActive(Authentication authentication) {
         try {
+            boolean isAdmin = isAdmin(authentication);
+            User currentUser = null;
+            if (!isAdmin) {
+                currentUser = getCurrentUser(authentication);
+                if (currentUser == null) {
+                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                }
+            }
+
             LazyEvent lazyEvent = new LazyEvent();
             lazyEvent.setFirst(0);
             lazyEvent.setRows(1000);
             lazyEvent.setPage(0);
+            
+            if (!isAdmin) {
+                 if (lazyEvent.getFilters() == null) {
+                    lazyEvent.setFilters(new HashMap<>());
+                }
+                
+                FilterMeta filterMeta = new FilterMeta();
+                filterMeta.setOperator("and");
+                List<Constraint> constraints = new ArrayList<>();
+                Constraint constraint = new Constraint();
+                constraint.setValue(currentUser.getUsername());
+                constraint.setMatchMode(MatchMode.equals.toString());
+                constraints.add(constraint);
+                filterMeta.setConstraints(constraints);
+                
+                lazyEvent.getFilters().put("username", filterMeta);
+            }
             
             List<User> userList = userGenericService.find(User.class, lazyEvent);
             
@@ -187,11 +272,20 @@ public class UserController {
 
     @DeleteMapping("/delete/{id}")
     @Operation(summary = "Soft delete user (set active to false)", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<MainDto> deleteUser(@PathVariable String id, Authentication authentication) {
+    public ResponseEntity<UserDto> deleteUser(@PathVariable String id, Authentication authentication) {
         try {
-            User user = userGenericService.get(User.class, Long.parseLong(id));
+            User user = userGenericService.get(User.class, id);
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            
+            boolean isAdmin = isAdmin(authentication);
+            if (!isAdmin) {
+                User currentUser = getCurrentUser(authentication);
+                if (currentUser == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+                if (!currentUser.getId().equals(user.getId())) {
+                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                }
             }
             
             // Soft delete - just set active to false
@@ -199,8 +293,8 @@ public class UserController {
             
             user = userGenericService.modify(user);
             
-            MainDto userDto = modelMapper.map(user, MainDto.class);
-            return new ResponseEntity<MainDto>(userDto, HttpStatus.OK);
+            UserDto userDto = modelMapper.map(user, UserDto.class);
+            return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);
             
         } catch (Exception e) {
             e.printStackTrace();

@@ -57,7 +57,7 @@ public class CreditWalletController {
     private boolean isAdmin(Authentication authentication) {
         if (authentication == null) return false;
         Collection<String> roles = keycloakJwtUtils.getRealmRolesFromJwtToken(authentication);
-        return roles != null && roles.contains("admin");
+        return roles != null && roles.stream().anyMatch(role -> role.equalsIgnoreCase("ADMIN"));
     }
 
     private User getCurrentUser(Authentication authentication) {
@@ -181,32 +181,54 @@ public class CreditWalletController {
     }
     
     @PostMapping("/list")
-    @Operation(summary = "Get paginated list of credit wallets", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Get paginated list of credit wallets for current user", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<DataTableDto<CreditWalletDto>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<CreditWallet> creditWalletList = null;
         long count = 0;
         try {
-            boolean isAdmin = isAdmin(authentication);
-            if (!isAdmin) {
-                User currentUser = getCurrentUser(authentication);
-                if (currentUser == null) {
-                    return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-                }
-                
-                if (lazyEvent.getFilters() == null) {
-                    lazyEvent.setFilters(new HashMap<>());
-                }
-                
-                FilterMeta filterMeta = new FilterMeta();
-                filterMeta.setOperator("and");
-                List<Constraint> constraints = new ArrayList<>();
-                Constraint constraint = new Constraint();
-                constraint.setValue(currentUser.getUsername());
-                constraint.setMatchMode(MatchMode.equals.toString());
-                constraints.add(constraint);
-                filterMeta.setConstraints(constraints);
-                
-                lazyEvent.getFilters().put("user.username", filterMeta);
+            User currentUser = getCurrentUser(authentication);
+            if (currentUser == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            
+            if (lazyEvent.getFilters() == null) {
+                lazyEvent.setFilters(new HashMap<>());
+            }
+            
+            FilterMeta filterMeta = new FilterMeta();
+            filterMeta.setOperator("and");
+            List<Constraint> constraints = new ArrayList<>();
+            Constraint constraint = new Constraint();
+            constraint.setValue(currentUser.getUsername());
+            constraint.setMatchMode(MatchMode.equals.toString());
+            constraints.add(constraint);
+            filterMeta.setConstraints(constraints);
+            
+            lazyEvent.getFilters().put("user.username", filterMeta);
+
+            creditWalletList = creditWalletGenericService.find(CreditWallet.class, lazyEvent);
+            count = creditWalletGenericService.count(CreditWallet.class, lazyEvent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        DataTableDto<CreditWalletDto> dataTableDto = new DataTableDto<CreditWalletDto>();
+        List<CreditWalletDto> creditWalletDto = modelMapper.map(creditWalletList, new TypeToken<List<CreditWalletDto>>() {}.getType());
+        dataTableDto.setData(creditWalletDto);
+        dataTableDto.setTotalRecords(count);
+
+        return new ResponseEntity<DataTableDto<CreditWalletDto>>(dataTableDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/list")
+    @Operation(summary = "Get paginated list of all credit wallets (Admin only)", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<DataTableDto<CreditWalletDto>> findAll(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
+        List<CreditWallet> creditWalletList = null;
+        long count = 0;
+        try {
+            if (!isAdmin(authentication)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
 
             creditWalletList = creditWalletGenericService.find(CreditWallet.class, lazyEvent);
