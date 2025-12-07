@@ -3,8 +3,6 @@ package com.smart.edilek.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.smart.edilek.entity.lookup.SignatureType;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,15 +33,17 @@ public class PetitionAgreements implements Serializable {
 	@Column(name="terms_of_service", columnDefinition = "TINYINT(1) DEFAULT 0")
 	private Boolean termsOfService = false;
 
+	@Column(name="information_correct", columnDefinition = "TINYINT(1) DEFAULT 0")
+	private Boolean informationCorrect = false;
+
+	@Column(name="legal_warning", columnDefinition = "TINYINT(1) DEFAULT 0")
+	private Boolean legalWarning = false;
+
 	@Column(name="data_sharing", columnDefinition = "TINYINT(1) DEFAULT 0")
 	private Boolean dataSharing = false;
 
 	@Column(name="institution_data_sharing", columnDefinition = "TINYINT(1) DEFAULT 0")
 	private Boolean institutionDataSharing = false;
-
-	@ManyToOne
-	@JoinColumn(name="signature_type_id")
-	private SignatureType signatureType;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;

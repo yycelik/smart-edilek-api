@@ -45,7 +45,7 @@ public class PetitionRequest implements Serializable {
 	private LocalDateTime deadline;
 
 	@ManyToOne
-	@JoinColumn(name="currency_id", nullable = false)
+	@JoinColumn(name="currency_id")
 	private Currency currency;
 
 	@Column(name="created_date")

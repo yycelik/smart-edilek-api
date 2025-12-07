@@ -2,8 +2,6 @@ package com.smart.edilek.models;
 
 import java.time.LocalDateTime;
 
-import com.smart.edilek.models.lookup.SignatureTypeDto;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,13 +20,16 @@ public class PetitionAgreementsDto {
 	private Boolean termsOfService;
 
 	@Getter @Setter
+	private Boolean informationCorrect;
+
+	@Getter @Setter
+	private Boolean legalWarning;
+
+	@Getter @Setter
 	private Boolean dataSharing;
 
 	@Getter @Setter
 	private Boolean institutionDataSharing;
-
-	@Getter @Setter
-	private SignatureTypeDto signatureType;
 
 	@Getter @Setter
 	private LocalDateTime createdDate;

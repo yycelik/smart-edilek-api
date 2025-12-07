@@ -3,6 +3,7 @@ package com.smart.edilek.models;
 import java.time.LocalDateTime;
 
 import com.smart.edilek.models.lookup.PrivacyLevelDto;
+import com.smart.edilek.models.lookup.EvidenceTypeDto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +41,7 @@ public class PetitionAttachmentDto {
 	private PrivacyLevelDto privacyLevel;
 
 	@Getter @Setter
-	private String evidenceTypes;
+	private EvidenceTypeDto evidenceType;
 
 	@Getter @Setter
 	private LocalDateTime createdDate;

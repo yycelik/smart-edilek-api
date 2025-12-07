@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import com.smart.edilek.entity.lookup.PrivacyLevel;
+import com.smart.edilek.entity.lookup.EvidenceType;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -54,8 +55,9 @@ public class PetitionAttachment implements Serializable {
 	@JoinColumn(name="privacy_level_id")
 	private PrivacyLevel privacyLevel;
 
-	@Column(name="evidence_types", length = 500)
-	private String evidenceTypes;
+	@ManyToOne
+	@JoinColumn(name="evidence_type_id", nullable = false)
+	private EvidenceType evidenceType;
 
 	@Column(name="created_date")
 	private LocalDateTime createdDate;
