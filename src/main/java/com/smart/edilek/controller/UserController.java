@@ -1,5 +1,6 @@
 package com.smart.edilek.controller;
 
+import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/user")
 @Tag(name = "User Controller", description = "User management endpoints")

@@ -1,5 +1,6 @@
 package com.smart.edilek.controller;
 
+import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Auth Controller", description = "Keycloak authentication and authorization endpoints")

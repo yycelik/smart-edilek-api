@@ -1,5 +1,6 @@
 package com.smart.edilek.controller.lookup;
 
+import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/lookup/signature-type")
 @Tag(name = "Signature Type Lookup", description = "Signature type lookup endpoints")

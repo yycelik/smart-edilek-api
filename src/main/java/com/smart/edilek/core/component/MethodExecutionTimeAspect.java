@@ -17,7 +17,7 @@ public class MethodExecutionTimeAspect {
     @Value("${logging.executionTime.enabled:false}")
     private boolean isExecutionTimeLoggingEnabled;
 
-    @Around("@annotation(com.smart.edilek.core.annotation.LogExecutionTime)")
+    @Around("@annotation(com.smart.edilek.core.annotation.LogExecutionTime) || @within(com.smart.edilek.core.annotation.LogExecutionTime)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!isExecutionTimeLoggingEnabled) {
             return joinPoint.proceed();

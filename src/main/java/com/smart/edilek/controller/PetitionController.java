@@ -1,5 +1,6 @@
 package com.smart.edilek.controller;
 
+import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.List;
 import java.util.HashMap;
 
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/petition")
 @Tag(name = "Petition Controller", description = "Petition management endpoints")

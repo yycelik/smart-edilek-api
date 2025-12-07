@@ -1,5 +1,6 @@
 package com.smart.edilek.controller;
 
+import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+@LogExecutionTime
 @RestController
 @RequestMapping("/petitiontypeinfo")
 @Tag(name = "Petition Type Info Controller", description = "Petition type info management endpoints")
