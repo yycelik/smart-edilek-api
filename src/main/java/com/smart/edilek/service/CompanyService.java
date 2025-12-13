@@ -30,7 +30,7 @@ public class CompanyService {
         }
 
         if (user.getCompany() != null) {
-            throw new RuntimeException("User already belongs to a company");
+            throw new RuntimeException("Önce mevcut firmadan silinmeli");
         }
 
         // 2. Create Company
@@ -76,7 +76,7 @@ public class CompanyService {
 
         User user = users.get(0);
         if (user.getCompany() != null) {
-            throw new RuntimeException("User already belongs to a company");
+            throw new RuntimeException("Önce mevcut firmadan silinmeli");
         }
 
         // 3. Add User to Company
@@ -119,7 +119,13 @@ public class CompanyService {
          }
          
          if (user.getCompanyRole() == CompanyRole.OWNER) {
-             throw new RuntimeException("Cannot remove the owner of the company");
+             long ownerCount = user.getCompany().getUsers().stream()
+                     .filter(u -> u.getCompanyRole() == CompanyRole.OWNER)
+                     .count();
+             
+             if (ownerCount <= 1) {
+                 throw new RuntimeException("Bir firmada en az 1 owner olmalı. Başka owner yok ise kendini ownerlıktan çıkartamazsınız.");
+             }
          }
          
          user.setCompany(null);

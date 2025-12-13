@@ -148,7 +148,11 @@ public class CompanyController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         
-        if (currentUser.getCompanyRole() != CompanyRole.OWNER && currentUser.getCompanyRole() != CompanyRole.ADMIN) {
+        // Allow if user is removing themselves OR if user is OWNER/ADMIN
+        boolean isSelfRemoval = currentUser.getId().equals(userId);
+        boolean isAuthorized = currentUser.getCompanyRole() == CompanyRole.OWNER || currentUser.getCompanyRole() == CompanyRole.ADMIN;
+
+        if (!isSelfRemoval && !isAuthorized) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         
