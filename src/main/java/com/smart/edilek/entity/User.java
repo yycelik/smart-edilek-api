@@ -61,6 +61,14 @@ public class User implements Serializable {
 	@OneToMany(mappedBy="user")
 	private List<CreditTransaction> creditTransactions;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="company_id")
+	private Company company;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name="company_role", length = 50)
+	private com.smart.edilek.enums.CompanyRole companyRole;
+
 	@PrePersist
 	protected void onCreate() {
 		createdDate = LocalDateTime.now();

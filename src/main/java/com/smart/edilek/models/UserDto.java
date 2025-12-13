@@ -30,4 +30,10 @@ public class UserDto {
 
 	@Getter @Setter
 	private boolean active;
+
+	@Getter @Setter
+	private CompanyDto company;
+
+	@Getter @Setter
+	private String companyRole;
 }
