@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smart.edilek.entity.Petition;
+import com.smart.edilek.entity.PetitionAiHistory;
 import com.smart.edilek.entity.User;
 import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
@@ -47,6 +48,9 @@ public class PetitionController {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private GenericServiceImp<PetitionAiHistory> petitionAiHistoryGenericService;
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new petition", security = @SecurityRequirement(name = "bearerAuth"))
@@ -199,5 +203,23 @@ public class PetitionController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PutMapping("/{id}/ai-result")
+    public ResponseEntity<PetitionDto> updateAiResult(@PathVariable Long id, @RequestBody String aiResult) {
+        Petition petition = petitionGenericService.get(Petition.class, id);
+        if (petition == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        petition.setAiResult(aiResult);
+        petitionGenericService.modify(petition);
+
+        PetitionAiHistory history = new PetitionAiHistory();
+        history.setPetition(petition);
+        history.setAiResult(aiResult);
+        petitionAiHistoryGenericService.add(history);
+
+        return new ResponseEntity<>(modelMapper.map(petition, PetitionDto.class), HttpStatus.OK);
     }
 }

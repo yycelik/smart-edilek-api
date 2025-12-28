@@ -35,6 +35,9 @@ public class PetitionDto {
 	private String summary;
 
 	@Getter @Setter
+	private String aiResult;
+
+	@Getter @Setter
 	private PetitionTypeDto petitionType;
 
 	@Getter @Setter

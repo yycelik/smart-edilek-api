@@ -51,6 +51,9 @@ public class Petition implements Serializable {
 	@Column(name="summary", nullable = false, columnDefinition = "TEXT")
 	private String summary;
 
+	@Column(name="ai_result", columnDefinition = "TEXT")
+	private String aiResult;
+
 	// Tür & Kurum
 	@ManyToOne
 	@JoinColumn(name="petition_type_id", nullable = false)
