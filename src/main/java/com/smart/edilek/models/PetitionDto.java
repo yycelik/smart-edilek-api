@@ -3,10 +3,8 @@ package com.smart.edilek.models;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.smart.edilek.models.lookup.InstitutionCategoryDto;
 import com.smart.edilek.models.lookup.PetitionModeDto;
 import com.smart.edilek.models.lookup.PetitionStatusDto;
-import com.smart.edilek.models.lookup.PetitionTypeDto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -38,13 +36,7 @@ public class PetitionDto {
 	private String aiResult;
 
 	@Getter @Setter
-	private PetitionTypeDto petitionType;
-
-	@Getter @Setter
 	private String typeName;
-
-	@Getter @Setter
-	private InstitutionCategoryDto institutionCategory;
 
 	@Getter @Setter
 	private String institutionName;

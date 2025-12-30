@@ -3,9 +3,6 @@ package com.smart.edilek.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.smart.edilek.entity.lookup.PetitionType;
-import com.smart.edilek.entity.lookup.InstitutionCategory;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,16 +27,8 @@ public class PetitionTypeInfo implements Serializable {
 	@JoinColumn(name="petition_id", nullable = false)
 	private Petition petition;
 
-	@ManyToOne
-	@JoinColumn(name="petition_type_id", nullable = false)
-	private PetitionType petitionType;
-
 	@Column(name="custom_type_name", length = 255)
 	private String customTypeName;
-
-	@ManyToOne
-	@JoinColumn(name="institution_category_id")
-	private InstitutionCategory institutionCategory;
 
 	@Column(name="institution_name", length = 255)
 	private String institutionName;

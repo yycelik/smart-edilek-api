@@ -6,8 +6,6 @@ import java.util.List;
 
 import com.smart.edilek.entity.lookup.PetitionMode;
 import com.smart.edilek.entity.lookup.PetitionStatus;
-import com.smart.edilek.entity.lookup.PetitionType;
-import com.smart.edilek.entity.lookup.InstitutionCategory;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -55,16 +53,8 @@ public class Petition implements Serializable {
 	private String aiResult;
 
 	// Tür & Kurum
-	@ManyToOne
-	@JoinColumn(name="petition_type_id", nullable = false)
-	private PetitionType petitionType;
-
 	@Column(name="type_name", length = 255)
 	private String typeName;
-
-	@ManyToOne
-	@JoinColumn(name="institution_category_id")
-	private InstitutionCategory institutionCategory;
 
 	@Column(name="institution_name", length = 255)
 	private String institutionName;
