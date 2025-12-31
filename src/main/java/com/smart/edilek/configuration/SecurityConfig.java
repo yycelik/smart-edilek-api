@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui-custom.html").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/analytics/**").permitAll()
                 // Protected endpoints
                 .requestMatchers("/api/auth/**").hasAuthority("ROLE_USER")
                 .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
