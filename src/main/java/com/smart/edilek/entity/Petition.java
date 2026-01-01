@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.smart.edilek.entity.lookup.PetitionMode;
 import com.smart.edilek.entity.lookup.PetitionStatus;
+import com.smart.edilek.entity.lookup.PetitionAiModel;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,6 +39,10 @@ public class Petition implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="petition_status_id", nullable = false)
 	private PetitionStatus petitionStatus;
+
+	@ManyToOne
+	@JoinColumn(name="ai_model_id")
+	private PetitionAiModel aiModel;
 
 	@Column(name="credit_cost", nullable = false, columnDefinition = "INT DEFAULT 1")
 	private Integer creditCost = 1;

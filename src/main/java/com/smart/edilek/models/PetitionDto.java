@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.smart.edilek.models.lookup.PetitionModeDto;
 import com.smart.edilek.models.lookup.PetitionStatusDto;
+import com.smart.edilek.models.lookup.PetitionAiModelDto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,9 @@ public class PetitionDto {
 
 	@Getter @Setter
 	private PetitionStatusDto petitionStatus;
+
+	@Getter @Setter
+	private PetitionAiModelDto aiModel;
 
 	@Getter @Setter
 	private Integer creditCost;
