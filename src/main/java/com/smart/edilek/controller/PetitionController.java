@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.smart.edilek.entity.Petition;
 import com.smart.edilek.entity.PetitionAiHistory;
 import com.smart.edilek.entity.User;
+import com.smart.edilek.entity.Company;
 import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.FilterMeta;
@@ -58,7 +59,12 @@ public class PetitionController {
         try {
             // Set relationships
             if (petition.getUser() != null && petition.getUser().getId() != null && !petition.getUser().getId().isEmpty()) {
-                petition.setUser(userGenericService.get(User.class, petition.getUser().getId()));
+                User user = userGenericService.get(User.class, petition.getUser().getId());
+                petition.setUser(user);
+                
+                if (user.getCompany() != null) {
+                    petition.setCompany(user.getCompany());
+                }
             }
 
             petitionGenericService.add(petition);
@@ -81,7 +87,12 @@ public class PetitionController {
         try {
             // Set relationships
             if (petition.getUser() != null && petition.getUser().getId() != null && !petition.getUser().getId().isEmpty()) {
-                petition.setUser(userGenericService.get(User.class, petition.getUser().getId()));
+                User user = userGenericService.get(User.class, petition.getUser().getId());
+                petition.setUser(user);
+                
+                if (user.getCompany() != null) {
+                    petition.setCompany(user.getCompany());
+                }
             }
 
             petition = petitionGenericService.modify(petition);
@@ -131,12 +142,19 @@ public class PetitionController {
                 filterMeta.setOperator("and");
                 
                 Constraint constraint = new Constraint();
-                constraint.setValue(authentication.getName());
                 constraint.setMatchMode("equals");
                 
-                filterMeta.setConstraints(List.of(constraint));
+                User currentUser = userGenericService.get(User.class, authentication.getName());
                 
-                lazyEvent.getFilters().put("user.id", filterMeta);
+                if (currentUser != null && currentUser.getCompany() != null) {
+                    constraint.setValue(currentUser.getCompany().getId().toString());
+                    filterMeta.setConstraints(List.of(constraint));
+                    lazyEvent.getFilters().put("company.id", filterMeta);
+                } else {
+                    constraint.setValue(authentication.getName());
+                    filterMeta.setConstraints(List.of(constraint));
+                    lazyEvent.getFilters().put("user.id", filterMeta);
+                }
             }
 
             petitionList = petitionGenericService.find(Petition.class, lazyEvent);

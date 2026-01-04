@@ -33,6 +33,10 @@ public class Petition implements Serializable {
 	private User user;
 
 	@ManyToOne
+	@JoinColumn(name="company_id")
+	private Company company;
+
+	@ManyToOne
 	@JoinColumn(name="petition_mode_id", nullable = false)
 	private PetitionMode petitionMode;
 
