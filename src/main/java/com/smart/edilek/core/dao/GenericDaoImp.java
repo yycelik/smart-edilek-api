@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
+import com.smart.edilek.core.enumObject.MatchMode;
 import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.FilterMeta;
 import com.smart.edilek.core.models.LazyEvent;
@@ -82,7 +83,8 @@ public class GenericDaoImp<T> implements GenericDao<T> {
                 if (filter != null && filter.getConstraints() != null) {
 					Predicate fieldPredicate = builder.conjunction(); // Default to AND
 					for (Constraint constraint : filter.getConstraints()) {
-						if (constraint.getValue() != null && !constraint.getValue().toString().isEmpty()) {
+						boolean isNullMode = MatchMode.isNull.name().equals(constraint.getMatchMode());
+						if (isNullMode || (constraint.getValue() != null && !constraint.getValue().toString().isEmpty())) {
 							Path<String> path = getPath(root, field, filter);
 							Predicate constraintPredicate = getPredicate(builder, builder.conjunction(), constraint, path);
 							fieldPredicate = applyOperator(builder, fieldPredicate, constraintPredicate, filter.getOperator());
@@ -135,7 +137,8 @@ public class GenericDaoImp<T> implements GenericDao<T> {
                 if (filter != null && filter.getConstraints() != null) {
 					Predicate fieldPredicate = builder.conjunction(); // Default to AND
 					for (Constraint constraint : filter.getConstraints()) {
-						if (constraint.getValue() != null && !constraint.getValue().toString().isEmpty()) {
+						boolean isNullMode = MatchMode.isNull.name().equals(constraint.getMatchMode());
+						if (isNullMode || (constraint.getValue() != null && !constraint.getValue().toString().isEmpty())) {
 							Path<String> path = getPath(root, field, filter);
 							Predicate constraintPredicate = getPredicate(builder, builder.conjunction(), constraint, path);
 							fieldPredicate = applyOperator(builder, fieldPredicate, constraintPredicate, filter.getOperator());
@@ -213,6 +216,9 @@ public class GenericDaoImp<T> implements GenericDao<T> {
 				break;
 			case "notEquals":
 				predicate = builder.and(predicate, builder.notEqual(path, constraint.getValue()));
+				break;
+			case "isNull":
+				predicate = builder.and(predicate, builder.isNull(path));
 				break;
 			case "noFilter":
 			default:

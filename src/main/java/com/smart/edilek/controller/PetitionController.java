@@ -1,6 +1,8 @@
 package com.smart.edilek.controller;
 
 import com.smart.edilek.core.annotation.LogExecutionTime;
+import com.smart.edilek.core.enumObject.MatchMode;
+
 import java.util.List;
 import java.util.HashMap;
 
@@ -22,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.smart.edilek.entity.Petition;
 import com.smart.edilek.entity.PetitionAiHistory;
 import com.smart.edilek.entity.User;
-import com.smart.edilek.entity.Company;
 import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.FilterMeta;
@@ -111,13 +112,35 @@ public class PetitionController {
     
     @GetMapping("/get/{id}")
     @Operation(summary = "Get petition by ID", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<PetitionDto> getPetition(@PathVariable String id) {
+    public ResponseEntity<PetitionDto> getPetition(@PathVariable String id, Authentication authentication) {
         Petition petition = null;
         try {
             petition = petitionGenericService.get(Petition.class, Long.parseLong(id));
             if (petition == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
+            // Security Check
+            User currentUser = userGenericService.get(User.class, authentication.getName());
+            boolean isAuthorized = false;
+
+            if (currentUser.getCompany() != null) {
+                // User is in a company
+                if (petition.getCompany() != null && petition.getCompany().getId().equals(currentUser.getCompany().getId())) {
+                    isAuthorized = true;
+                }
+            } else {
+                // User is NOT in a company
+                // Can only see their own petitions that are NOT assigned to a company
+                if (petition.getUser().getId().equals(currentUser.getId()) && petition.getCompany() == null) {
+                    isAuthorized = true;
+                }
+            }
+
+            if (!isAuthorized) {
+                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -154,6 +177,14 @@ public class PetitionController {
                     constraint.setValue(authentication.getName());
                     filterMeta.setConstraints(List.of(constraint));
                     lazyEvent.getFilters().put("user.id", filterMeta);
+
+                    // Filter petitions with no company
+                    FilterMeta companyFilterMeta = new FilterMeta();
+                    companyFilterMeta.setOperator("and");
+                    Constraint companyConstraint = new Constraint();
+                    companyConstraint.setMatchMode(MatchMode.isNull.name());
+                    companyFilterMeta.setConstraints(List.of(companyConstraint));
+                    lazyEvent.getFilters().put("company", companyFilterMeta);
                 }
             }
 
