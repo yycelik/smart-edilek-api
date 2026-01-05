@@ -1,7 +1,7 @@
-ollama pull qwen2.5:7b
+ollama pull deepseek-r1:8b
 
 cat << 'EOF' > /root/.ollama/Modelfile-dilekce
-FROM qwen2.5
+FROM deepseek-r1:8b
 
 SYSTEM """
 Sen Türkiye'de resmi dilekçe yazımı ve hukuki metinler konusunda uzmansın.
@@ -28,7 +28,6 @@ KURALLAR:
 - Türkiye'de kullanılan dilekçe formatına uy
 - Tarih verilmemişse boş bırak
 - content alanında başlıkları BÜYÜK HARFLE yaz
-- content hepsini büyük harf ile yazma ve noktalama işaretlerine dikkat et
 - Paragraflar arasında TEK boş satır bırak
 - Maddeleme gerekiyorsa 1., 2., 3. formatını kullan
 - Gereksiz tekrar yapma
@@ -36,8 +35,6 @@ KURALLAR:
 - Telefon, adres, e-posta ekleme
 - Kullanıcı vermedikçe kişisel veri ekleme
 - Bilmediğin verileri üretme yerlerine [Tarhi], [TCKN], [ADRES], [KURUM ADI] vb gibi koy
-- Madde Madde yazma 
-- Giriş gelişme sonuç yada tek paragrafta yaz 
 
 DİLEKÇE TİPLERİNE ÖZEL:
 - İTİRAZ dilekçelerinde süre ve dayanak vurgusu yap
@@ -52,4 +49,4 @@ EOF
 
 
 
-ollama create dilekce-qwen -f /root/.ollama/Modelfile-dilekce
+ollama create dilekce-deepseek -f /root/.ollama/Modelfile-dilekce
