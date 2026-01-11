@@ -8,8 +8,8 @@ BEGIN
     DECLARE v_credit INT DEFAULT 0;
     DECLARE v_wallet_id BIGINT DEFAULT NULL;
 
-    -- Yalnızca PAID (2) ve CAMPAIGN (5) siparişlerde işlem yapılır
-    IF NEW.user_order_status_id IN ('2', '5') THEN
+    -- Yalnızca PAID (2), CAMPAIGN (5) ve MANUAL (6) siparişlerde işlem yapılır
+    IF NEW.user_order_status_id IN ('2', '5', '6') THEN
 
         -- Kullanıcının mevcut cüzdanı var mı?
         SELECT id INTO v_wallet_id

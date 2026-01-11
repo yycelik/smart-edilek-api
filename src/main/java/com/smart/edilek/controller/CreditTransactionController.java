@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import com.smart.edilek.entity.CreditTransaction;
 import com.smart.edilek.entity.User;
 import com.smart.edilek.entity.CreditWallet;
@@ -134,7 +135,7 @@ public class CreditTransactionController {
     
     @GetMapping("/get/{id}")
     @Operation(summary = "Get credit transaction by ID", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<CreditTransactionDto> getCreditTransaction(@PathVariable String id) {
+    public ResponseEntity<CreditTransactionDto> getCreditTransaction(@PathVariable String id, Authentication authentication) {
         CreditTransaction creditTransaction = null;
         try {
             creditTransaction = creditTransactionGenericService.get(CreditTransaction.class, Long.parseLong(id));
@@ -152,7 +153,29 @@ public class CreditTransactionController {
     
     @PostMapping("/list")
     @Operation(summary = "Get paginated list of credit transactions", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<CreditTransactionDto>> find(@RequestBody LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<CreditTransactionDto>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
+        List<CreditTransaction> creditTransactionList = null;
+        long count = 0;
+        try {
+            creditTransactionList = creditTransactionGenericService.find(CreditTransaction.class, lazyEvent);
+            count = creditTransactionGenericService.count(CreditTransaction.class, lazyEvent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        DataTableDto<CreditTransactionDto> dataTableDto = new DataTableDto<CreditTransactionDto>();
+        List<CreditTransactionDto> creditTransactionDto = modelMapper.map(creditTransactionList, new TypeToken<List<CreditTransactionDto>>() {}.getType());
+        dataTableDto.setData(creditTransactionDto);
+        dataTableDto.setTotalRecords(count);
+
+        return new ResponseEntity<DataTableDto<CreditTransactionDto>>(dataTableDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/list")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Get paginated list of credit transactions for admin", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<DataTableDto<CreditTransactionDto>> findForAdmin(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<CreditTransaction> creditTransactionList = null;
         long count = 0;
         try {

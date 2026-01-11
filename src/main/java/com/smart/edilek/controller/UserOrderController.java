@@ -11,6 +11,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -166,6 +167,28 @@ public class UserOrderController {
                 }
             }
             
+            userOrderList = userOrderGenericService.find(UserOrder.class, lazyEvent);
+            count = userOrderGenericService.count(UserOrder.class, lazyEvent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        DataTableDto<UserOrderDto> dataTableDto = new DataTableDto<UserOrderDto>();
+        List<UserOrderDto> userOrderDto = modelMapper.map(userOrderList, new TypeToken<List<UserOrderDto>>() {}.getType());
+        dataTableDto.setData(userOrderDto);
+        dataTableDto.setTotalRecords(count);
+
+        return new ResponseEntity<DataTableDto<UserOrderDto>>(dataTableDto, HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/list")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @Operation(summary = "Get paginated list of user orders for admin", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<DataTableDto<UserOrderDto>> findForAdmin(@RequestBody LazyEvent lazyEvent) {
+        List<UserOrder> userOrderList = null;
+        long count = 0;
+        try {
             userOrderList = userOrderGenericService.find(UserOrder.class, lazyEvent);
             count = userOrderGenericService.count(UserOrder.class, lazyEvent);
         } catch (Exception e) {

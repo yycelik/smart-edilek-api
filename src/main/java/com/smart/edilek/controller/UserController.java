@@ -12,6 +12,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize; // Eklendi
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -177,7 +178,6 @@ public class UserController {
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            
             boolean isAdmin = isAdmin(authentication);
             if (!isAdmin) {
                 User currentUser = getCurrentUser(authentication);
@@ -185,6 +185,25 @@ public class UserController {
                 if (!currentUser.getId().equals(user.getId())) {
                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+        UserDto userDto = modelMapper.map(user, UserDto.class);
+        return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/get/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Get user by ID for Admin", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<UserDto> getUserForAdmin(@PathVariable String id) {
+        User user = null;
+        try {
+            user = userGenericService.get(User.class, id);
+            if (user == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         } catch (Exception e) {
             e.printStackTrace();

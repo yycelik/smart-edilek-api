@@ -8,8 +8,8 @@ BEGIN
     DECLARE v_credit INT DEFAULT 0;
     DECLARE v_wallet_id BIGINT DEFAULT NULL;
 
-    -- SADECE PAID (2) VE CAMPAIGN (5) DURUMLARINDA ÇALIŞSIN
-    IF NEW.user_order_status_id IN (2, 5)
+    -- SADECE PAID (2), CAMPAIGN (5) VE MANUAL (6) DURUMLARINDA ÇALIŞSIN
+    IF NEW.user_order_status_id IN (2, 5, 6)
        AND OLD.user_order_status_id <> NEW.user_order_status_id THEN
 
         -- PAKETİN VERDİĞİ KREDİYİ AL

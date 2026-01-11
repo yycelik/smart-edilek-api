@@ -12,6 +12,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -223,16 +224,36 @@ public class CreditWalletController {
         return new ResponseEntity<DataTableDto<CreditWalletDto>>(dataTableDto, HttpStatus.OK);
     }
 
+    @PostMapping("/admin/find")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Find credit wallets (Admin only)", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<DataTableDto<CreditWalletDto>> findForAdmin(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
+        List<CreditWallet> creditWalletList = null;
+        long count = 0;
+        try {
+            // Admin doesn't need forced user filter
+            creditWalletList = creditWalletGenericService.find(CreditWallet.class, lazyEvent);
+            count = creditWalletGenericService.count(CreditWallet.class, lazyEvent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        DataTableDto<CreditWalletDto> dataTableDto = new DataTableDto<CreditWalletDto>();
+        List<CreditWalletDto> creditWalletDto = modelMapper.map(creditWalletList, new TypeToken<List<CreditWalletDto>>() {}.getType());
+        dataTableDto.setData(creditWalletDto);
+        dataTableDto.setTotalRecords(count);
+
+        return new ResponseEntity<DataTableDto<CreditWalletDto>>(dataTableDto, HttpStatus.OK);
+    }
+
     @PostMapping("/admin/list")
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Get paginated list of all credit wallets (Admin only)", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<DataTableDto<CreditWalletDto>> findAll(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<CreditWallet> creditWalletList = null;
         long count = 0;
         try {
-            if (!isAdmin(authentication)) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-
             creditWalletList = creditWalletGenericService.find(CreditWallet.class, lazyEvent);
             count = creditWalletGenericService.count(CreditWallet.class, lazyEvent);
         } catch (Exception e) {
