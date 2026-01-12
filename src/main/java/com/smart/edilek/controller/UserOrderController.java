@@ -65,17 +65,21 @@ public class UserOrderController {
         try {
             // Set relationships
             if (userOrder.getUser() != null && userOrder.getUser().getId() != null && !userOrder.getUser().getId().isEmpty()) {
-                userOrder.setUser(userGenericService.get(User.class, userOrder.getUser().getId()));
+                User user = userGenericService.get(User.class, userOrder.getUser().getId());
+                userOrder.setUser(user);
+                if (user.getCompany() != null) {
+                    userOrder.setCompany(user.getCompany());
+                }
             }
             if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
                 userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId()));
             }
             
             if (authentication != null) {
-                String username = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
-                if (username != null) {
-                    userOrder.setCreatedBy(username);
-                    userOrder.setUpdatedBy(username);
+                String userId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
+                if (userId != null) {
+                    userOrder.setCreatedBy(userId);
+                    userOrder.setUpdatedBy(userId);
                 }
             }
 
@@ -95,16 +99,20 @@ public class UserOrderController {
         try {
             // Set relationships
             if (userOrder.getUser() != null && userOrder.getUser().getId() != null && !userOrder.getUser().getId().isEmpty()) {
-                userOrder.setUser(userGenericService.get(User.class, userOrder.getUser().getId()));
+                User user = userGenericService.get(User.class, userOrder.getUser().getId());
+                userOrder.setUser(user);
+                if (user.getCompany() != null) {
+                    userOrder.setCompany(user.getCompany());
+                }
             }
             if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
                 userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId()));
             }
             
             if (authentication != null) {
-                String username = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
-                if (username != null) {
-                    userOrder.setUpdatedBy(username);
+                String userId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
+                if (userId != null) {
+                    userOrder.setUpdatedBy(userId);
                 }
             }
 
@@ -142,7 +150,7 @@ public class UserOrderController {
         List<UserOrder> userOrderList = null;
         long count = 0;
         try {
-            // Add user_id filter for authenticated user
+            // Add user_id or company_id filter for authenticated user
             if (authentication != null) {
                 String userId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
                 if (userId != null) {
@@ -152,18 +160,36 @@ public class UserOrderController {
                         lazyEvent.setFilters(filters);
                     }
                     
-                    Constraint constraint = new Constraint();
-                    constraint.setValue(userId);
-                    constraint.setMatchMode("equals");
-                    
-                    List<Constraint> constraints = new ArrayList<>();
-                    constraints.add(constraint);
-                    
-                    FilterMeta filterMeta = new FilterMeta();
-                    filterMeta.setOperator("and");
-                    filterMeta.setConstraints(constraints);
-                    
-                    filters.put("user.id", filterMeta);
+                    User user = userGenericService.get(User.class, userId);
+                    if (user != null && user.getCompany() != null) {
+                         // Filter by company
+                        Constraint constraint = new Constraint();
+                        constraint.setValue(user.getCompany().getId());
+                        constraint.setMatchMode("equals");
+                        
+                        List<Constraint> constraints = new ArrayList<>();
+                        constraints.add(constraint);
+                        
+                        FilterMeta filterMeta = new FilterMeta();
+                        filterMeta.setOperator("and");
+                        filterMeta.setConstraints(constraints);
+                        
+                        filters.put("company.id", filterMeta);
+                    } else {
+                        // Filter by user
+                        Constraint constraint = new Constraint();
+                        constraint.setValue(userId);
+                        constraint.setMatchMode("equals");
+                        
+                        List<Constraint> constraints = new ArrayList<>();
+                        constraints.add(constraint);
+                        
+                        FilterMeta filterMeta = new FilterMeta();
+                        filterMeta.setOperator("and");
+                        filterMeta.setConstraints(constraints);
+                        
+                        filters.put("user.id", filterMeta);
+                    }
                 }
             }
             

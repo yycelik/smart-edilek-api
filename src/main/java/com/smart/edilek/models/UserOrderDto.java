@@ -19,6 +19,9 @@ public class UserOrderDto {
 	private UserDto user;
 
 	@Getter @Setter
+	private CompanyDto company;
+
+	@Getter @Setter
 	private LicensePackageDto licensePackage;
 
 	@Getter @Setter
