@@ -25,8 +25,12 @@ public class CreditWallet implements Serializable {
 	private long id;
 
 	@OneToOne
-	@JoinColumn(name="user_id", nullable = false)
+	@JoinColumn(name="user_id", nullable = true)
 	private User user;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="company_id")
+	private Company company;
 
 	@Column(name="total_credits", nullable = false, columnDefinition = "INT DEFAULT 0")
 	private Integer totalCredits = 0;

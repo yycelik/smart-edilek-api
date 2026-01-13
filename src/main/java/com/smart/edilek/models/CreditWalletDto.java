@@ -14,6 +14,9 @@ public class CreditWalletDto {
 	private UserDto user;
 
 	@Getter @Setter
+	private CompanyDto company;
+
+	@Getter @Setter
 	private Integer totalCredits;
 
 	@Getter @Setter

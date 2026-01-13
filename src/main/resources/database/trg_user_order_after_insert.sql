@@ -11,18 +11,35 @@ BEGIN
     -- Yalnızca PAID (2), CAMPAIGN (5) ve MANUAL (6) siparişlerde işlem yapılır
     IF NEW.user_order_status_id IN ('2', '5', '6') THEN
 
-        -- Kullanıcının mevcut cüzdanı var mı?
-        SELECT id INTO v_wallet_id
-        FROM credit_wallet
-        WHERE user_id = NEW.user_id
-        LIMIT 1;
+        -- Wallet belirleme mantığı (Kurumsal öncelikli)
+        IF NEW.company_id IS NOT NULL THEN
+            -- Kurumsal Cüzdan Ara
+            SELECT id INTO v_wallet_id
+            FROM credit_wallet
+            WHERE company_id = NEW.company_id
+            LIMIT 1;
 
-        -- Yoksa yeni wallet aç
-        IF v_wallet_id IS NULL THEN
-            INSERT INTO credit_wallet (user_id, created_date)
-            VALUES (NEW.user_id, NOW());
+            -- Yoksa Kurumsal Cüzdan Aç (user_id NULL olmalı)
+            IF v_wallet_id IS NULL THEN
+                INSERT INTO credit_wallet (user_id, company_id, created_date, active)
+                VALUES (NULL, NEW.company_id, NOW(), 1);
+                
+                SET v_wallet_id = LAST_INSERT_ID();
+            END IF;
+        ELSE
+            -- Bireysel Cüzdan Ara
+            SELECT id INTO v_wallet_id
+            FROM credit_wallet
+            WHERE user_id = NEW.user_id
+            LIMIT 1;
 
-            SET v_wallet_id = LAST_INSERT_ID();
+            -- Yoksa Bireysel Cüzdan Aç
+            IF v_wallet_id IS NULL THEN
+                INSERT INTO credit_wallet (user_id, company_id, created_date, active)
+                VALUES (NEW.user_id, NULL, NOW(), 1);
+
+                SET v_wallet_id = LAST_INSERT_ID();
+            END IF;
         END IF;
 
         -- Lisans paketinden kredi miktarını al

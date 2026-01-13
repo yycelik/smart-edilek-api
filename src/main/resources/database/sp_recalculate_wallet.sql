@@ -9,6 +9,7 @@ BEGIN
       INTO v_total
       FROM credit_transaction
      WHERE wallet_id = p_wallet_id
+       AND active = 1
        AND credit_transaction_type_id IN (1, 3, 4);  -- PURCHASE, REFUND, ADJUST
 
     -- USED CREDITS (SPEND)
@@ -16,6 +17,7 @@ BEGIN
       INTO v_used
       FROM credit_transaction
      WHERE wallet_id = p_wallet_id
+       AND active = 1
        AND credit_transaction_type_id = 2;  -- SPEND
 
     -- UPDATE WALLET

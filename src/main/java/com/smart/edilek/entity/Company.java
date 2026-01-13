@@ -54,6 +54,9 @@ public class Company implements Serializable {
     @OneToMany(mappedBy="company")
     private List<User> users;
 
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+    private List<CreditWallet> creditWallets;
+
     @PrePersist
     protected void onCreate() {
         createdDate = LocalDateTime.now();

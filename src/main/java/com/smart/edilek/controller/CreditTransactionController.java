@@ -2,6 +2,8 @@ package com.smart.edilek.controller;
 
 import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -27,6 +29,9 @@ import com.smart.edilek.entity.Petition;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
+import com.smart.edilek.core.models.FilterMeta;
+import com.smart.edilek.core.models.Constraint;
+import com.smart.edilek.core.enumObject.MatchMode;
 import com.smart.edilek.models.CreditTransactionDto;
 import com.smart.edilek.security.jwt.KeycloakJwtUtils;
 import com.smart.edilek.core.service.GenericServiceImp;
@@ -62,6 +67,16 @@ public class CreditTransactionController {
     @Autowired
     private KeycloakJwtUtils keycloakJwtUtils;
     
+    private User getCurrentUser(Authentication authentication) {
+        String username = keycloakJwtUtils.getUsernameFromJwtToken(authentication);
+        if (username == null) return null;
+        List<User> users = userGenericService.find(User.class, "username", username, MatchMode.equals, 1);
+        if (users != null && !users.isEmpty()) {
+            return users.get(0);
+        }
+        return null;
+    }
+
     @PostMapping(value = "/add")
     @Operation(summary = "Add new credit transaction", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<MainDto> addCreditTransaction(@RequestBody CreditTransaction creditTransaction, Authentication authentication) {
@@ -157,6 +172,36 @@ public class CreditTransactionController {
         List<CreditTransaction> creditTransactionList = null;
         long count = 0;
         try {
+            User currentUser = getCurrentUser(authentication);
+            if (currentUser == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+            
+            if (lazyEvent.getFilters() == null) {
+                lazyEvent.setFilters(new HashMap<>());
+            }
+            
+            FilterMeta filterMeta = new FilterMeta();
+            filterMeta.setOperator("and");
+            List<Constraint> constraints = new ArrayList<>();
+            Constraint constraint = new Constraint();
+            
+            if (currentUser.getCompany() != null) {
+                // If user belongs to a company, show company transactions
+                constraint.setValue(currentUser.getCompany().getId().toString());
+                constraint.setMatchMode(MatchMode.equals.toString());
+                constraints.add(constraint);
+                filterMeta.setConstraints(constraints);
+                lazyEvent.getFilters().put("wallet.company.id", filterMeta);
+            } else {
+                // Otherwise show user transactions
+                constraint.setValue(currentUser.getUsername());
+                constraint.setMatchMode(MatchMode.equals.toString());
+                constraints.add(constraint);
+                filterMeta.setConstraints(constraints);
+                lazyEvent.getFilters().put("user.username", filterMeta);
+            }
+
             creditTransactionList = creditTransactionGenericService.find(CreditTransaction.class, lazyEvent);
             count = creditTransactionGenericService.count(CreditTransaction.class, lazyEvent);
         } catch (Exception e) {
@@ -179,6 +224,35 @@ public class CreditTransactionController {
         List<CreditTransaction> creditTransactionList = null;
         long count = 0;
         try {
+            // Check if user.id filter exists and map to company wallet if necessary
+            if (lazyEvent.getFilters() != null && lazyEvent.getFilters().containsKey("user.id")) {
+                FilterMeta filterMeta = lazyEvent.getFilters().get("user.id");
+                if (filterMeta != null && filterMeta.getConstraints() != null && !filterMeta.getConstraints().isEmpty()) {
+                    String userId = (String) filterMeta.getConstraints().get(0).getValue();
+                    if (userId != null && !userId.isEmpty()) {
+                        User user = userGenericService.get(User.class, userId);
+                        if (user != null && user.getCompany() != null) {
+                            // User belongs to a company, filter by company wallet ID instead
+                            // Remove user.id filter
+                            lazyEvent.getFilters().remove("user.id");
+                            
+                            // Add wallet.company.id filter
+                            FilterMeta companyFilter = new FilterMeta();
+                            companyFilter.setOperator("and");
+                            List<Constraint> constraints = new ArrayList<>();
+                            Constraint constraint = new Constraint();
+                            constraint.setValue(user.getCompany().getId().toString());
+                            constraint.setMatchMode(MatchMode.equals.toString());
+                            constraints.add(constraint);
+                            companyFilter.setConstraints(constraints);
+                            
+                            lazyEvent.getFilters().put("wallet.company.id", companyFilter);
+                        }
+                        // If user doesn't belong to a company, we keep user.id filter (individual wallet works with user_id)
+                    }
+                }
+            }
+
             creditTransactionList = creditTransactionGenericService.find(CreditTransaction.class, lazyEvent);
             count = creditTransactionGenericService.count(CreditTransaction.class, lazyEvent);
         } catch (Exception e) {

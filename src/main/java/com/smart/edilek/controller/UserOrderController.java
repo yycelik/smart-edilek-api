@@ -215,6 +215,34 @@ public class UserOrderController {
         List<UserOrder> userOrderList = null;
         long count = 0;
         try {
+            // Check if user.id filter exists and map to company if necessary
+            if (lazyEvent.getFilters() != null && lazyEvent.getFilters().containsKey("user.id")) {
+                FilterMeta filterMeta = lazyEvent.getFilters().get("user.id");
+                if (filterMeta != null && filterMeta.getConstraints() != null && !filterMeta.getConstraints().isEmpty()) {
+                    String userId = (String) filterMeta.getConstraints().get(0).getValue();
+                    if (userId != null && !userId.isEmpty()) {
+                        User user = userGenericService.get(User.class, userId);
+                        if (user != null && user.getCompany() != null) {
+                            // User belongs to a company, filter by company id instead
+                            // Remove user.id filter
+                            lazyEvent.getFilters().remove("user.id");
+                            
+                            // Add company.id filter
+                            FilterMeta companyFilter = new FilterMeta();
+                            companyFilter.setOperator("and");
+                            List<Constraint> constraints = new ArrayList<>();
+                            Constraint constraint = new Constraint();
+                            constraint.setValue(user.getCompany().getId().toString());
+                            constraint.setMatchMode("equals");
+                            constraints.add(constraint);
+                            companyFilter.setConstraints(constraints);
+                            
+                            lazyEvent.getFilters().put("company.id", companyFilter);
+                        }
+                    }
+                }
+            }
+
             userOrderList = userOrderGenericService.find(UserOrder.class, lazyEvent);
             count = userOrderGenericService.count(UserOrder.class, lazyEvent);
         } catch (Exception e) {
