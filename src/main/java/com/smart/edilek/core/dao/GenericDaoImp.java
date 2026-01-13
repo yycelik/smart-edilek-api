@@ -154,21 +154,31 @@ public class GenericDaoImp<T> implements GenericDao<T> {
 		return (long) typedCountQuery.getSingleResult();
 	}
 
+	/*
+	 * Hata logundaki Attribute '...#id(BASIC)' is not joinable mesajı şundan kaynaklanıyor:
+	 * Siz user.id yerine wallet.company.id filtresi eklediğinizde, GenericDaoImp içindeki 
+	 * mevcut döngü mantığı şu hatayı yapıyor:
+	 * 
+	 * wallet tablosuna join atıyor.
+	 * Aradaki company tablosunu atlayıp (döngüdeki i++ ve mantık hatası nedeniyle), 
+	 * wallet tablosu üzerinde id diye bir tabloya daha join atmaya çalışıyor.
+	 * Ancak id bir tablo değil, bir kolon olduğu için "Not joinable" hatası patlıyor.
+	 * Bu method (getPath), Generic mimarinin kalbinde olduğu için wallet.company.
+	 * id gibi derin sorguların çalışabilmesi adına düzeltilmesi gerekiyor.
+	 * 
+	 * Bu düzeltmeyi yapmazsam, controller tarafında GenericService devreden çıkarıp 
+	 * manuel bir JPA Criteria sorgusu yazmamız gerekir ki bu da projedeki generic yapıyı bozar.
+	 */
 	private Path<String> getPath(Root<T> root, String field, FilterMeta filter) {
 		Path<String> path = null;
 		if(field.contains(".")){
-			String[] fieldNames = field.split("\\."); // split the string by "." to get nested field names
-			Join<Object, Object> join = null;
+			String[] fieldNames = field.split("\\."); 
+			jakarta.persistence.criteria.From<?, ?> from = root;
 			for (int i = 0; i < fieldNames.length; i++) {
-				if (join == null) {
-					join = root.join(fieldNames[i], JoinType.INNER);
-					path = join.get(fieldNames[i + 1]);
-					i++;
+				if (i == fieldNames.length - 1) {
+					path = from.get(fieldNames[i]);
 				} else {
-					join = join.join(fieldNames[i], JoinType.INNER);
-					if (i == fieldNames.length - 1) {
-						path = join.get(fieldNames[i]);
-					}
+					from = from.join(fieldNames[i], JoinType.INNER);
 				}
 			}
 		} else {
