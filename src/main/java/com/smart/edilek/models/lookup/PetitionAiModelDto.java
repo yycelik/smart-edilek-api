@@ -13,7 +13,13 @@ public class PetitionAiModelDto {
 	
 	@Getter @Setter
 	private String name;
+
+	@Getter @Setter
+	private Integer creditCost;
 	
+	@Getter @Setter
+	private String requiredPackageCodes;
+
 	@Getter @Setter
 	private String description;
 	

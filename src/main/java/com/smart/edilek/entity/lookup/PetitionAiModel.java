@@ -28,6 +28,12 @@ public class PetitionAiModel implements Serializable {
 	@Column(name="name", length = 100)
 	private String name;
 
+	@Column(name="credit_cost", nullable = false, columnDefinition = "INT DEFAULT 1")
+	private Integer creditCost = 1;
+
+	@Column(name="required_package_codes", length = 255)
+	private String requiredPackageCodes;
+
 	@Column(name="description", length = 255)
 	private String description;
 

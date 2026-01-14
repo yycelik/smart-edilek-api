@@ -19,10 +19,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smart.edilek.entity.lookup.PetitionAiModel;
+import com.smart.edilek.entity.UserOrder;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
+import com.smart.edilek.core.models.Constraint;
+import com.smart.edilek.core.models.FilterMeta;
+import com.smart.edilek.core.enumObject.MatchMode;
 import com.smart.edilek.core.service.GenericServiceImp;
+import com.smart.edilek.security.jwt.KeycloakJwtUtils;
+
+import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -36,6 +48,12 @@ public class PetitionAiModelController {
 
     @Autowired
     private GenericServiceImp<PetitionAiModel> petitionAiModelService;
+
+    @Autowired
+    private GenericServiceImp<UserOrder> userOrderService;
+    
+    @Autowired(required = false)
+    private KeycloakJwtUtils keycloakJwtUtils;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -89,12 +107,68 @@ public class PetitionAiModelController {
     
     @PostMapping("/list")
     @Operation(summary = "Get paginated list of petition ai models", security = @SecurityRequirement(name = "bearerAuth"))
-    public ResponseEntity<DataTableDto<PetitionAiModel>> find(@RequestBody LazyEvent lazyEvent) {
+    public ResponseEntity<DataTableDto<PetitionAiModel>> find(@RequestBody LazyEvent lazyEvent, Authentication authentication) {
         List<PetitionAiModel> list = null;
         long count = 0;
         try {
             list = petitionAiModelService.find(PetitionAiModel.class, lazyEvent);
             count = petitionAiModelService.count(PetitionAiModel.class, lazyEvent);
+            
+            if (authentication != null && authentication.isAuthenticated()) {
+                String userId = null;
+                if (keycloakJwtUtils != null) {
+                   userId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
+                } else {
+                   userId = authentication.getName();
+                }
+                
+                if (userId != null) {
+                    // Fetch user orders
+                    LazyEvent orderEvent = new LazyEvent();
+                    orderEvent.setFirst(0);
+                    orderEvent.setRows(100); 
+                    Map<String, FilterMeta> filters = new HashMap<>();
+                    
+                    Constraint constraint = new Constraint(userId, MatchMode.equals.name());
+                    FilterMeta filterMeta = new FilterMeta("and", Collections.singletonList(constraint));
+                    
+                    filters.put("user.id", filterMeta);
+                    orderEvent.setFilters(filters);
+                    
+                    List<UserOrder> userOrders = userOrderService.find(UserOrder.class, orderEvent);
+                    
+                    // Filter active orders
+                    List<String> activePackageCodes = userOrders.stream()
+                        .filter(o -> Boolean.TRUE.equals(o.getActive()))
+                        .filter(o -> o.getExpiresAt() == null || o.getExpiresAt().isAfter(LocalDateTime.now()))
+                        .map(o -> o.getLicensePackage().getCode())
+                        .collect(Collectors.toList());
+                        
+                    // Filter Models
+                    list = list.stream().filter(model -> {
+                        String required = model.getRequiredPackageCodes();
+                        if (required == null || required.trim().isEmpty()) {
+                            return true; // No requirement
+                        }
+                        
+                        String[] reqCodes = required.split(",");
+                        for (String req : reqCodes) {
+                            if (activePackageCodes.contains(req.trim())) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }).collect(Collectors.toList());
+                    
+                    count = list.size();
+                }
+            } else {
+                 list = list.stream().filter(model -> 
+                    model.getRequiredPackageCodes() == null || model.getRequiredPackageCodes().trim().isEmpty()
+                 ).collect(Collectors.toList());
+                 count = list.size();
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
