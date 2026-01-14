@@ -56,5 +56,8 @@ public class LicensePackageDto {
 	private LocalDateTime updatedDate;
 
 	@Getter @Setter
+	private String features;
+
+	@Getter @Setter
 	private boolean active;
 }

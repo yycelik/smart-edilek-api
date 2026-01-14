@@ -73,6 +73,9 @@ public class LicensePackage implements Serializable {
 	@Column(name="active", columnDefinition = "TINYINT(1) DEFAULT 1")
 	private Boolean active = true;
 
+	@Column(name="features", length = 4000)
+	private String features;
+
 	//bi-directional one-to-many association to UserOrder
 	@OneToMany(mappedBy="licensePackage")
 	private List<UserOrder> userOrders;
