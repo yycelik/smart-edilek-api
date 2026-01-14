@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -72,7 +73,13 @@ public class UserOrderController {
                 }
             }
             if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
-                userOrder.setLicensePackage(licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId()));
+                LicensePackage licensePackage = licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId());
+                userOrder.setLicensePackage(licensePackage);
+
+                // Set expires_at based on duration_days
+                if (licensePackage != null && licensePackage.getDurationDays() != null && licensePackage.getDurationDays() > 0) {
+                    userOrder.setExpiresAt(LocalDateTime.now().plusDays(licensePackage.getDurationDays()));
+                }
             }
             
             if (authentication != null) {
@@ -270,7 +277,8 @@ public class UserOrderController {
             List<UserOrder> userOrderList = userOrderGenericService.find(UserOrder.class, lazyEvent);
             
             List<UserOrder> activeList = userOrderList.stream()
-                .filter(UserOrder::getActive)
+                .filter(order -> Boolean.TRUE.equals(order.getActive()) && 
+                        (order.getExpiresAt() == null || order.getExpiresAt().isAfter(LocalDateTime.now())))
                 .toList();
             
             List<UserOrderDto> userOrderDto = modelMapper.map(activeList, new TypeToken<List<UserOrderDto>>() {}.getType());

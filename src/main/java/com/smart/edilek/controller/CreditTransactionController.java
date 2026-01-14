@@ -4,6 +4,7 @@ import com.smart.edilek.core.annotation.LogExecutionTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.time.LocalDateTime;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -89,7 +90,14 @@ public class CreditTransactionController {
                 creditTransaction.setWallet(creditWalletGenericService.get(CreditWallet.class, creditTransaction.getWallet().getId()));
             }
             if (creditTransaction.getUserOrder() != null && creditTransaction.getUserOrder().getId() > 0) {
-                creditTransaction.setUserOrder(userOrderGenericService.get(UserOrder.class, creditTransaction.getUserOrder().getId()));
+                UserOrder order = userOrderGenericService.get(UserOrder.class, creditTransaction.getUserOrder().getId());
+
+                // Expiration Check
+                if (order != null && order.getExpiresAt() != null && order.getExpiresAt().isBefore(LocalDateTime.now())) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+
+                creditTransaction.setUserOrder(order);
             }
             if (creditTransaction.getPetition() != null && creditTransaction.getPetition().getId() > 0) {
                 creditTransaction.setPetition(petitionGenericService.get(Petition.class, creditTransaction.getPetition().getId()));
