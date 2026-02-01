@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edilek-configmap
+data:
+  keycloak-auth-server-url: "https://keycloak.s3t.co"
+  keycloak-realm: "dilekce"
+  keycloak-client-id: "dev-api.edilek.com"
+  nowpayment-ipn-key: xxxxxx
+  openai-api-key: xxxxxx

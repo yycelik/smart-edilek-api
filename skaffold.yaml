@@ -22,11 +22,13 @@ profiles:
       - k8s/prod/deployment.yaml
       - k8s/prod/service.yaml
       - k8s/prod/ingress.yaml
-      - k8s/prod/keycloak-configmap.yaml 
+      #- k8s/prod/edilek-configmap.yaml
+      #- k8s/prod/edilek-configuration-secret.yaml
 manifests:
   rawYaml:
     - k8s/dev/deployment.yaml
     - k8s/dev/service.yaml
     - k8s/dev/ingress.yaml  
     - k8s/dev/transport.yaml
-    - k8s/dev/keycloak-configmap.yaml  
+    #- k8s/dev/edilek-configmap.yaml
+    #- k8s/dev/edilek-configuration-secret.yaml

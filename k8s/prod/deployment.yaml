@@ -38,38 +38,48 @@ spec:
           - name: DATASOURCE_URL
             valueFrom: 
               secretKeyRef:
-                name: smart-database
-                key: url
+                name: edilek-configuration-secret
+                key: smart-database-url
           - name: DATASOURCE_USERNAME
             valueFrom: 
               secretKeyRef:
-                name: smart-database
-                key: username
+                name: edilek-configuration-secret
+                key: smart-database-username
           - name: DATASOURCE_PASSWORD
             valueFrom: 
               secretKeyRef:
-                name: smart-database
-                key: password 
+                name: edilek-configuration-secret
+                key: smart-database-password
           - name: CERTIFICATE_PASSWORD
             valueFrom: 
               secretKeyRef:
-                name: smart-certificate
-                key: password
+                name: edilek-configuration-secret
+                key: smart-certificate-password
           - name: KEYCLOAK_AUTH_SERVER_URL
             valueFrom:
               configMapKeyRef:
-                name: smart-keycloak-config
-                key: auth-server-url
+                name: edilek-configmap
+                key: keycloak-auth-server-url
           - name: KEYCLOAK_REALM
             valueFrom:
               configMapKeyRef:
-                name: smart-keycloak-config
-                key: realm
+                name: edilek-configmap
+                key: keycloak-realm
           - name: KEYCLOAK_CLIENT_ID
             valueFrom:
               configMapKeyRef:
-                name: smart-keycloak-config
-                key: client-id 
+                name: edilek-configmap
+                key: keycloak-client-id 
+          - name: NOWPAYMENTS_IPN_SECRET
+            valueFrom:
+              configMapKeyRef:
+                name: edilek-configmap
+                key: nowpayment-ipn-key
+          - name: OPENAI_API_KEY
+            valueFrom:
+              configMapKeyRef:
+                name: edilek-configmap
+                key: openai-api-key
         volumeMounts:
           - name: my-certificate-volume
             mountPath: "/etc/certs"

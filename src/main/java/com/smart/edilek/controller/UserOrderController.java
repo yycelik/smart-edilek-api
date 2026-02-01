@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.smart.edilek.entity.UserOrder;
 import com.smart.edilek.entity.User;
 import com.smart.edilek.entity.LicensePackage;
+import com.smart.edilek.entity.lookup.UserOrderStatus;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.LazyEvent;
 import com.smart.edilek.core.models.MainDto;
@@ -55,10 +56,47 @@ public class UserOrderController {
     private GenericServiceImp<LicensePackage> licensePackageGenericService;
 
     @Autowired
+    private GenericServiceImp<UserOrderStatus> userOrderStatusGenericService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
     private KeycloakJwtUtils keycloakJwtUtils;
+    
+    @PutMapping(value = "/update-status/{id}/{statusId}")
+    @Operation(summary = "Update user order status", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<MainDto> updateUserOrderStatus(@PathVariable Long id, @PathVariable Long statusId, Authentication authentication) {
+        UserOrder userOrder = null;
+        try {
+            userOrder = userOrderGenericService.get(UserOrder.class, id);
+            if (userOrder == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            UserOrderStatus status = userOrderStatusGenericService.get(UserOrderStatus.class, statusId);
+            if (status == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            userOrder.setUserOrderStatus(status);
+            
+            if (authentication != null) {
+                String userId = keycloakJwtUtils.getUserIdFromJwtToken(authentication);
+                if (userId != null) {
+                    userOrder.setUpdatedBy(userId);
+                }
+            }
+
+            userOrder = userOrderGenericService.modify(userOrder);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        
+        MainDto userOrderDto = modelMapper.map(userOrder, MainDto.class);
+        return new ResponseEntity<MainDto>(userOrderDto, HttpStatus.OK);
+    }
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new user order", security = @SecurityRequirement(name = "bearerAuth"))
@@ -74,12 +112,25 @@ public class UserOrderController {
             }
             if (userOrder.getLicensePackage() != null && userOrder.getLicensePackage().getId() > 0) {
                 LicensePackage licensePackage = licensePackageGenericService.get(LicensePackage.class, userOrder.getLicensePackage().getId());
+                
+                if (licensePackage == null) {
+                    System.err.println("LicensePackage not found with ID: " + userOrder.getLicensePackage().getId());
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+                
                 userOrder.setLicensePackage(licensePackage);
 
+                // Enforce Price and Currency from Package
+                userOrder.setPrice(licensePackage.getPrice());
+                userOrder.setCurrency(licensePackage.getCurrency());
+
                 // Set expires_at based on duration_days
-                if (licensePackage != null && licensePackage.getDurationDays() != null && licensePackage.getDurationDays() > 0) {
+                if (licensePackage.getDurationDays() != null && licensePackage.getDurationDays() > 0) {
                     userOrder.setExpiresAt(LocalDateTime.now().plusDays(licensePackage.getDurationDays()));
                 }
+            } else {
+                 System.err.println("LicensePackage ID is missing or 0");
+                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             
             if (authentication != null) {

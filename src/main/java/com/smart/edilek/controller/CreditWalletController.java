@@ -100,10 +100,8 @@ public class CreditWalletController {
             }
             
             if (creditWallet.getUser() == null && creditWallet.getCompany() == null) {
-                 MainDto dto = new MainDto();
-                 dto.setStatus(false);
-                 dto.setMessage("Wallet must belong to either a User or a Company.");
-                 return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
+                 // Wallet must belong to either a User or a Company.
+                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
             
             if (authentication != null) {
