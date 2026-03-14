@@ -11,6 +11,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.smart.edilek.entity.Petition;
 import com.smart.edilek.entity.PetitionAiHistory;
 import com.smart.edilek.entity.User;
+import com.smart.edilek.entity.lookup.PetitionAiModel;
 import com.smart.edilek.core.models.Constraint;
 import com.smart.edilek.core.models.DataTableDto;
 import com.smart.edilek.core.models.FilterMeta;
@@ -53,6 +55,9 @@ public class PetitionController {
 
     @Autowired
     private GenericServiceImp<PetitionAiHistory> petitionAiHistoryGenericService;
+
+    @Autowired
+    private GenericServiceImp<PetitionAiModel> petitionAiModelGenericService;
     
     @PostMapping(value = "/add")
     @Operation(summary = "Add new petition", security = @SecurityRequirement(name = "bearerAuth"))
@@ -256,6 +261,141 @@ public class PetitionController {
 
     @PutMapping("/{id}/ai-result")
     public ResponseEntity<PetitionDto> updateAiResult(@PathVariable Long id, @RequestBody String aiResult) {
+        Petition petition = petitionGenericService.get(Petition.class, id);
+        if (petition == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        petition.setAiResult(aiResult);
+        petitionGenericService.modify(petition);
+
+        PetitionAiHistory history = new PetitionAiHistory();
+        history.setPetition(petition);
+        history.setAiResult(aiResult);
+        petitionAiHistoryGenericService.add(history);
+
+        return new ResponseEntity<>(modelMapper.map(petition, PetitionDto.class), HttpStatus.OK);
+    }
+
+    @PostMapping("/admin/list/user/{userId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Get paginated list of petitions by user", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<DataTableDto<PetitionDto>> findByUserForAdmin(@PathVariable String userId, @RequestBody(required = false) LazyEvent lazyEvent) {
+        List<Petition> petitionList = null;
+        long count = 0;
+        try {
+            if (userGenericService.get(User.class, userId) == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            if (lazyEvent == null) {
+                lazyEvent = new LazyEvent();
+            }
+            if (lazyEvent.getFilters() == null) {
+                lazyEvent.setFilters(new HashMap<>());
+            }
+
+            FilterMeta filterMeta = new FilterMeta();
+            filterMeta.setOperator("and");
+
+            Constraint constraint = new Constraint();
+            constraint.setMatchMode(MatchMode.equals.name());
+            constraint.setValue(userId);
+            filterMeta.setConstraints(List.of(constraint));
+
+            lazyEvent.getFilters().put("user.id", filterMeta);
+
+            petitionList = petitionGenericService.find(Petition.class, lazyEvent);
+            count = petitionGenericService.count(Petition.class, lazyEvent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        DataTableDto<PetitionDto> dataTableDto = new DataTableDto<>();
+        List<PetitionDto> petitionDto = modelMapper.map(petitionList, new TypeToken<List<PetitionDto>>() {}.getType());
+        dataTableDto.setData(petitionDto);
+        dataTableDto.setTotalRecords(count);
+
+        return new ResponseEntity<>(dataTableDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/get/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Get petition by ID", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PetitionDto> getPetitionForAdmin(@PathVariable String id) {
+        Petition petition = null;
+        try {
+            petition = petitionGenericService.get(Petition.class, Long.parseLong(id));
+            if (petition == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        PetitionDto petitionDto = modelMapper.map(petition, PetitionDto.class);
+        return new ResponseEntity<>(petitionDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/admin/modify")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Modify petition (draft save)", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<MainDto> modifyPetitionForAdmin(@RequestBody Petition petition) {
+        try {
+            if (petition.getUser() != null && petition.getUser().getId() != null && !petition.getUser().getId().isEmpty()) {
+                User user = userGenericService.get(User.class, petition.getUser().getId());
+                petition.setUser(user);
+
+                if (user != null && user.getCompany() != null) {
+                    petition.setCompany(user.getCompany());
+                }
+            }
+
+            petition = petitionGenericService.modify(petition);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        MainDto petitionDto = new MainDto();
+        petitionDto.setId((int) petition.getId());
+        petitionDto.setActive(petition.getActive());
+        petitionDto.setName(petition.getTitle());
+
+        return new ResponseEntity<>(petitionDto, HttpStatus.OK);
+    }
+
+    @PutMapping("/admin/{id}/change-model/{modelId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Change petition AI model", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PetitionDto> changeAiModelForAdmin(@PathVariable Long id, @PathVariable Long modelId) {
+        try {
+            Petition petition = petitionGenericService.get(Petition.class, id);
+            if (petition == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            PetitionAiModel model = petitionAiModelGenericService.get(PetitionAiModel.class, modelId);
+            if (model == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            petition.setAiModel(model);
+            petition = petitionGenericService.modify(petition);
+
+            return new ResponseEntity<>(modelMapper.map(petition, PetitionDto.class), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/admin/{id}/ai-result")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: Update petition AI result", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<PetitionDto> updateAiResultForAdmin(@PathVariable Long id, @RequestBody String aiResult) {
         Petition petition = petitionGenericService.get(Petition.class, id);
         if (petition == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
